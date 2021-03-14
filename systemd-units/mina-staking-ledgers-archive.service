@@ -1,0 +1,12 @@
+[Unit]
+Description=Mina Staking Ledger Export
+After=mina.service
+StartLimitIntervalSec=60
+StartLimitBurst=5
+
+[Service]
+Type=simple
+ExecStart=/bin/bash /usr/local/bin/mina-export-ledgers.sh
+
+[Install]
+WantedBy=default.target

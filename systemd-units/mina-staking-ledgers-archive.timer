@@ -1,0 +1,10 @@
+[Unit]
+Description=Mina Staking Ledger Export Timer
+
+[Timer]
+OnCalendar=daily
+Unit=mina-staking-ledgers-archive.service
+Persistent=true
+
+[Install]
+WantedBy=default.target

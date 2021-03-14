@@ -1,0 +1,14 @@
+[Unit]
+Description=Mina Status Monitor
+StartLimitIntervalSec=60
+StartLimitBurst=3
+After=mina.service
+
+[Service]
+Type=simple
+Restart=always
+RestartSec=15
+ExecStart=/bin/bash /usr/local/bin/mina-status-monitor.sh
+
+[Install]
+WantedBy=default.target

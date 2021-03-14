@@ -1,0 +1,15 @@
+Port 1932
+PermitRootLogin no
+AllowUsers minar
+PubkeyAuthentication yes
+PasswordAuthentication no
+PermitEmptyPasswords no
+ChallengeResponseAuthentication no
+usePAM yes
+X11Forwarding yes
+PrintMotd no
+PrintLastLog yes
+ClientAliveInterval 60
+ClientAliveCountMax 3
+AcceptEnv LANG LC_*
+Subsystem sftp  /usr/lib/openssh/sftp-server
