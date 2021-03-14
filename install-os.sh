@@ -7,7 +7,7 @@ YOUR_GRAFANA_API_KEY=**********
 #provide a unique identifier for each prometheus instance sending data to grafana
 YOUR_MINA_NODE_IDENTIFIER=mina01
 
-cd mina-node-ops
+cd mina-node-install
 cp partial-configs/sshd_config /etc/ssh/sshd_config
 
 adduser minar
@@ -65,8 +65,8 @@ then
     cp systemd-units/node_exporter.service /etc/systemd/user/
 fi
 cd ..
-mv mina-node-ops /home/minar/mina-node-ops
-chown -R minar:minar /home/minar/mina-node-ops
+mv mina-node-install /home/minar/mina-node-install
+chown -R minar:minar /home/minar/mina-node-install
 
 echo "MAKE SURE YOU CAN SSH as minar on port 1932 BEFORE DISCONNECTING!"
 echo "MAKE SURE YOU CAN SSH as minar on port 1932 BEFORE DISCONNECTING!"

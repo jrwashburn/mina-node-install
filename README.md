@@ -1,4 +1,4 @@
-# mina-node-ops
+# mina-node-install
 PLEASE BE CAREFUL. These scripts make some assumptions about access to the system - i.e. we don't use root, and assume this is a new install. These scripts will remove root's ability to login or ssh. If your environment is different, you will likely need to make modifications.  
 
 This repo is a collection of scripts and configurations for a base debian 9 install. It automates most setup tasks; it leaves several manual steps to ensure passwords and keys are exclusively managed by the admin.
@@ -49,16 +49,16 @@ on a shiny new debian node, ssh'd in as root:
 ```console
 apt-get update  
 apt-get install -y git
-git clone https://github.com/jrwashburn/mina-node-ops
+git clone https://github.com/jrwashburn/mina-node-install
 #update your params at the top of the install scripts
-nano mina-node-ops/install-os.sh 
-nano mina-node-ops/install-mina.sh 
+nano mina-node-install/install-os.sh 
+nano mina-node-install/install-mina.sh 
 ```
 
 Running the install-os script will create a new user named minar (you'll be prompted for password, name, etc.) which will be the use you'll use on the node. (If you don't like minar, you can replace minar with whatever you like in the scripts.) It will also turn on ufw firewall and lock down inbound, change the sshd port, and disable root ssh and login -- so be careful that you know it worked, and know you can reconnect as minar, before you end this first session as root!
 
 ```console
-mina-node-ops/install-os.sh
+mina-node-install/install-os.sh
 ```
 *check that you can ssh in with minar user on new node before disconnecting!*  
 *install-os will disable ssh and login for root*  
@@ -66,7 +66,7 @@ mina-node-ops/install-os.sh
 ssh in as minar
 
 ```console
-cd mina-node-ops
+cd mina-node-install
 ./install-mina.sh
 mina daemon --generate-genesis-proof true --peer-list-url https://storage.googleapis.com/seed-lists/devnet_seeds.txt 
 ```
@@ -92,7 +92,7 @@ Confirm everything okay, then cleanup
 
 ```console
 cd ~
-rm -rf mina-node-ops
+rm -rf mina-node-install
 ```
 
 ## packages installed
