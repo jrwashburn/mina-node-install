@@ -16,3 +16,4 @@ systemctl --user enable node_exporter.service
 systemctl --user enable prometheus.service
 
 systemctl --user status
+sudo loginctl enable-linger
