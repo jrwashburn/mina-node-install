@@ -1,4 +1,5 @@
 #!/bin/bash -x
+INSTALL_MINA_POOL_PAYOUT=true
 
 # update your values - these will update the scripts to be installed with these parameters
 YOUR_SW_FEE=0.25
@@ -41,6 +42,11 @@ echo "deb [trusted=yes] http://packages.o1test.net release main" | sudo tee /etc
 sudo apt-get -y update
 sudo apt-get install -y curl unzip mina-testnet-postake-medium-curves=1.0.5-68200c7
 sudo apt-get install -y mina-archive=1.0.5-68200c7
+
+if $INSTALL_MINA_POOL_PAYOUT
+then
+    git clone https://github.com/jrwashburn/mina-pool-payout.git
+fi
 
 echo "start daemon interactive - control + c once running to stop"
 echo "RUN: mina daemon --generate-genesis-proof true --peer-list-url https://storage.googleapis.com/seed-lists/devnet_seeds.txt"
