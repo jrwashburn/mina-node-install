@@ -51,7 +51,7 @@ then
     rm $(echo $CURRENT_PROMETHEUS | cut -d '/' -f 9)
 
     sed -i "s^YOUR_GRAFANA_REMOTE_WRITE_ENDPOINT^$YOUR_GRAFANA_REMOTE_WRITE_ENDPOINT^g" partial-configs/prometheus.yml
-    sed -i "s^YOUR_GRAFANA_METRICS_INSTAgit NCE_ID^$YOUR_GRAFANA_METRICS_INSTANCE_ID^g" partial-configs/prometheus.yml
+    sed -i "s^YOUR_GRAFANA_METRICS_INSTANCE_ID^$YOUR_GRAFANA_METRICS_INSTANCE_ID^g" partial-configs/prometheus.yml
     sed -i "s^YOUR_GRAFANA_API_KEY^$YOUR_GRAFANA_API_KEY^g" partial-configs/prometheus.yml
     sed -i "s^YOUR_MINA_NODE_IDENTIFIER^$YOUR_MINA_NODE_IDENTIFIER^g" partial-configs/prometheus.yml
 
