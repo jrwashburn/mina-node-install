@@ -5,9 +5,11 @@ INSTALL_MINA_POOL_PAYOUT=true
 YOUR_SW_FEE=0.25
 YOUR_SW_ADDRESS=B62qkBqSkXgkirtU3n8HJ9YgwHh3vUD6kGJ5ZRkQYGNPeL5xYL2tL1L
 YOUR_LEDGER_ARCHIVE_DIRECTORY=/home/minar/ledger-archives
-THE_SEEDS_URL=https://storage.googleapis.com/seed-lists/devnet_seeds.txt
+THE_SEEDS_URL=https://storage.googleapis.com/mina-seed-lists/mainnet_seeds.txt
 YOUR_WALLET_FILE=~/keys/my-wallet
 YOUR_COINBASE_RECEIVER=B62qoigHEtJCoZ5ekbGHWyr9hYfc6fkZ2A41h9vvVZuvty9amzEz3yB
+MINA_VERSION=mina-mainnet=1.1.2-0975867
+ARCHIVE_VERSION=mina-archive=1.1.2-0975867
 
 YOUR_HOST_IP="$(curl https://api.ipify.org)"
 
@@ -40,8 +42,8 @@ sudo apt-get -y install jq
 
 echo "deb [trusted=yes] http://packages.o1test.net release main" | sudo tee /etc/apt/sources.list.d/mina.list
 sudo apt-get -y update
-sudo apt-get install -y curl unzip mina-testnet-postake-medium-curves=1.0.5-68200c7
-sudo apt-get install -y mina-archive=1.0.5-68200c7
+sudo apt-get install -y curl unzip $MINA_VERSION
+sudo apt-get install $ARCHIVE_VERSION
 
 if $INSTALL_MINA_POOL_PAYOUT
 then
@@ -49,7 +51,7 @@ then
 fi
 
 echo "start daemon interactive - control + c once running to stop"
-echo "RUN: mina daemon --generate-genesis-proof true --peer-list-url https://storage.googleapis.com/seed-lists/devnet_seeds.txt"
+echo "RUN: mina daemon --generate-genesis-proof true --peer-list-url https://storage.googleapis.com/mina-seed-lists/mainnet_seeds.txt"
 
 echo "THEN: upload keys and update pass phrases in ~/.mina-env"
 echo "set uid/pwd/host in ~/.mina-archive-env"
