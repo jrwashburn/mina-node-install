@@ -8,8 +8,8 @@ YOUR_LEDGER_ARCHIVE_DIRECTORY=/home/minar/ledger-archives
 THE_SEEDS_URL=https://storage.googleapis.com/mina-seed-lists/mainnet_seeds.txt
 YOUR_WALLET_FILE=~/keys/my-wallet
 YOUR_COINBASE_RECEIVER=B62qoigHEtJCoZ5ekbGHWyr9hYfc6fkZ2A41h9vvVZuvty9amzEz3yB
-MINA_VERSION=mina-mainnet=1.1.2-0975867
-ARCHIVE_VERSION=mina-archive=1.1.2-0975867
+MINA_VERSION=mina-mainnet=1.1.3-48401e9
+ARCHIVE_VERSION=mina-archive=1.1.3-48401e9
 
 YOUR_HOST_IP="$(curl https://api.ipify.org)"
 
@@ -43,7 +43,7 @@ sudo apt-get -y install jq
 echo "deb [trusted=yes] http://packages.o1test.net release main" | sudo tee /etc/apt/sources.list.d/mina.list
 sudo apt-get -y update
 sudo apt-get install -y curl unzip $MINA_VERSION
-sudo apt-get install $ARCHIVE_VERSION
+sudo apt-get install -y $ARCHIVE_VERSION
 
 if $INSTALL_MINA_POOL_PAYOUT
 then

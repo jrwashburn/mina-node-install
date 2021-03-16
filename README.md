@@ -68,7 +68,7 @@ ssh in as minar
 ```console
 cd mina-node-install
 ./install-mina.sh
-mina daemon --generate-genesis-proof true --peer-list-url https://storage.googleapis.com/seed-lists/devnet_seeds.txt 
+mina daemon --generate-genesis-proof true --peer-list-url https://storage.googleapis.com/mina-seed-lists/mainnet_seeds.txt
 ```
 
 CTRL+C to stop it once confirmed running okay  
