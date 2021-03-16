@@ -10,6 +10,7 @@ YOUR_WALLET_FILE=~/keys/my-wallet
 YOUR_COINBASE_RECEIVER=B62qoigHEtJCoZ5ekbGHWyr9hYfc6fkZ2A41h9vvVZuvty9amzEz3yB
 MINA_VERSION=mina-mainnet=1.1.3-48401e9
 ARCHIVE_VERSION=mina-archive=1.1.3-48401e9
+SIDECAR_VERSION=mina-bp-stats-sidecar=1.1.3-48401e9
 
 YOUR_HOST_IP="$(curl https://api.ipify.org)"
 
@@ -36,6 +37,7 @@ sudo cp systemd-units/mina* /etc/systemd/user/
 
 cp partial-configs/mina-env ~/.mina-env
 cp partial-configs/mina-archive-env ~/.mina-archive-env
+sudo cp partial-configs/mina-sidecar.json /etc/mina-sidecar.json
 
 sudo apt-get -y install bc
 sudo apt-get -y install jq
@@ -44,6 +46,7 @@ echo "deb [trusted=yes] http://packages.o1test.net release main" | sudo tee /etc
 sudo apt-get -y update
 sudo apt-get install -y curl unzip $MINA_VERSION
 sudo apt-get install -y $ARCHIVE_VERSION
+sudo apt-get install -y $SIDECAR_VERSION
 
 if $INSTALL_MINA_POOL_PAYOUT
 then
