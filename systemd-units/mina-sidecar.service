@@ -6,7 +6,7 @@ StartLimitBurst=5
 
 [Service]
 Type=simple
-ExecStart=/bin/bash /usr/local/bin/mina-bp-stats-sidecar
+ExecStart=/usr/bin/python3 /usr/local/bin/mina-bp-stats-sidecar
 
 [Install]
 WantedBy=default.target
