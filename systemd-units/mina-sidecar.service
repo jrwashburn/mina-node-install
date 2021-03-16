@@ -1,0 +1,12 @@
+[Unit]
+Description=Mina BP Stats Sidecar
+After=mina.service
+StartLimitIntervalSec=60
+StartLimitBurst=5
+
+[Service]
+Type=simple
+ExecStart=/bin/bash /usr/local/bin/mina-bp-stats-sidecar
+
+[Install]
+WantedBy=default.target

@@ -7,6 +7,7 @@ systemctl --user stop mina-status-monitor.service
 systemctl --user stop mina-staking-ledgers-archive.timer
 systemctl --user stop mina.service
 systemctl --user stop mina-archive.service
+systemctl --user stop mina-sidecar.service
 
 sudo apt-get remove -y mina-testnet-postake-medium-curves
 sudo apt-get remove -y mina-mainnet
@@ -20,4 +21,5 @@ systemctl --user daemon-reload
 systemctl --user start mina-archive.service
 systemctl --user start mina.service
 systemctl --user start mina-staking-ledgers-archive.timer
+systemctl --user start mina-sidecar.service
 systemctl --user start mina-status-monitor.service
