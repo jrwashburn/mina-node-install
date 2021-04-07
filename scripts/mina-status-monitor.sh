@@ -36,7 +36,7 @@ while :; do
     mina client set-snark-worker
     ((SNARKWORKERTURNEDOFF++))
   else
-    if [[ "$SNARKWORKERTURNEDOFF" > 0 ]]; then
+    if [[ "$SNARKWORKERTURNEDOFF" -gt 0 ]]; then
       mina client set-snark-worker -address ${SW_ADDRESS}
       mina client set-snark-work-fee $FEE
       SNARKWORKERTURNEDOFF=0
@@ -47,7 +47,7 @@ while :; do
   # If block height is more than 10 block behind, somthing is likely wrong
   DELTAVALIDATED="$(($HIGHESTUNVALIDATEDBLOCK-$HIGHESTBLOCK))"
   echo "DELTA VALIDATE: ", $DELTAVALIDATED
-  if [[ "$DELTAVALIDATED" > 10 ]]; then
+  if [[ "$DELTAVALIDATED" -gt 10 ]]; then
     echo "Node stuck validated block height delta more than 10 blocks"
     ((TOTALSTUCK++))
     systemctl --user restart mina
@@ -68,21 +68,21 @@ while :; do
     ((TOTALOFFLINECOUNT++))
   fi
 
-  if [[ "$CONNECTINGCOUNT" > 1 ]]; then
+  if [[ "$CONNECTINGCOUNT" -gt 1 ]]; then
     systemctl --user restart mina
     CONNECTINGCOUNT=0
   fi
 
-  if [[ "$OFFLINECOUNT" > 3 ]]; then
+  if [[ "$OFFLINECOUNT" -gt 3 ]]; then
     systemctl --user restart mina
     OFFLINECOUNT=0
   fi
 
-  if [[ "$ARCHIVERUNNING" > 0 ]]; then
+  if [[ "$ARCHIVERUNNING" -gt 0 ]]; then
     ARCHIVERRUNNING=0
   else
     ((ARCHIVEDOWNCOUNT++))
-  fi 
+  fi
   echo "Status:" $STAT, "Connecting Count, Total:" $CONNECTINGCOUNT $TOTALCONNECTINGCOUNT, "Offline Count, Total:" $OFFLINECOUNT $TOTALOFFLINECOUNT, "Archive Down Count:" $ARCHIVEDOWNCOUNT, "Node Stuck Below Tip:" $TOTALSTUCK, "Time Until Block:" $TIMEBEFORENEXTMIN
   sleep 300s
   test $? -gt 128 && break;
