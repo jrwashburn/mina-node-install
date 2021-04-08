@@ -1,7 +1,7 @@
 #!/bin/bash -x
-MINA_VERSION=mina-mainnet=1.1.4-a8893ab
-ARCHIVE_VERSION=mina-archive=1.1.4-a8893ab
-SIDECAR_VERSION=mina-bp-stats-sidecar=1.1.4-a8893ab
+MINA_VERSION=mina-mainnet=1.1.5-a42bdee
+ARCHIVE_VERSION=mina-archive=1.1.5-a42bdee
+SIDECAR_VERSION=mina-bp-stats-sidecar=1.1.5-a42bdee
 
 systemctl --user stop mina-status-monitor.service
 systemctl --user stop mina-staking-ledgers-archive.timer
