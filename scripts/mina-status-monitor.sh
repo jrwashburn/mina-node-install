@@ -1,3 +1,4 @@
+#Credit to _thanos for the original snarkstopper - https://forums.minaprotocol.com/t/guide-script-automagically-stops-snark-work-prior-of-getting-a-block-proposal/299
 MINA_STATUS=""
 STAT=""
 ARCHIVESTAT=0
@@ -47,8 +48,8 @@ while :; do
   # If block height is more than 10 block behind, somthing is likely wrong
   DELTAVALIDATED="$(($HIGHESTUNVALIDATEDBLOCK-$HIGHESTBLOCK))"
   echo "DELTA VALIDATE: ", $DELTAVALIDATED
-  if [[ "$DELTAVALIDATED" -gt 10 ]]; then
-    echo "Node stuck validated block height delta more than 10 blocks"
+  if [[ "$DELTAVALIDATED" -gt 5 ]]; then
+    echo "Node stuck validated block height delta more than 5 blocks"
     ((TOTALSTUCK++))
     systemctl --user restart mina
   fi
@@ -85,5 +86,6 @@ while :; do
   fi
   echo "Status:" $STAT, "Connecting Count, Total:" $CONNECTINGCOUNT $TOTALCONNECTINGCOUNT, "Offline Count, Total:" $OFFLINECOUNT $TOTALOFFLINECOUNT, "Archive Down Count:" $ARCHIVEDOWNCOUNT, "Node Stuck Below Tip:" $TOTALSTUCK, "Time Until Block:" $TIMEBEFORENEXTMIN
   sleep 300s
+  #check if sleep exited with break (ctrl+c) to exit the loop
   test $? -gt 128 && break;
 done
