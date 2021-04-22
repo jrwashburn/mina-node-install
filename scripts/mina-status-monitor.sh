@@ -18,28 +18,40 @@ while :; do
   MINA_STATUS="$(mina client status -json)"
 
   STAT="$(echo $MINA_STATUS | jq .sync_status)"
-  NEXTPROP="$(echo $MINA_STATUS | jq .next_block_production.timing[1].time)"
   HIGHESTBLOCK="$(echo $MINA_STATUS | jq .highest_block_length_received)"
   HIGHESTUNVALIDATEDBLOCK="$(echo $MINA_STATUS | jq .highest_unvalidated_block_length_received)"
   ARCHIVERUNNING=`ps -A | grep coda-archive | wc -l`
 
-  # Calculate whether block producer will run within the next 5 mins
-  # If up for a block within 5 mins, stop snarking, resume on next pass
-  NEXTPROP="${NEXTPROP:1}"
-  NEXTPROP="${NEXTPROP:0:-1}"
-  NOW="$(date +%s%N | cut -b1-13)"
-  TIMEBEFORENEXT="$(($NEXTPROP-$NOW))"
-  TIMEBEFORENEXTSEC="${TIMEBEFORENEXT:0:-3}"
-  TIMEBEFORENEXTMIN="$((${TIMEBEFORENEXTSEC} / ${SECONDS_PER_MINUTE}))"
-  if [ $TIMEBEFORENEXTMIN -lt 5 ]; then
-    echo "Stop snarking"
-    mina client set-snark-worker
-    ((SNARKWORKERTURNEDOFF++))
-  else
-    if [[ "$SNARKWORKERTURNEDOFF" -gt 0 ]]; then
-      mina client set-snark-worker -address ${SW_ADDRESS}
-      mina client set-snark-work-fee $FEE
-      SNARKWORKERTURNEDOFF=0
+  if [[ "$STAT" == "\"Synced\"" ]]; then
+    # Calculate whether block producer will run within the next 5 mins
+    # If up for a block within 5 mins, stop snarking, resume on next pass
+    # First check if we are going to produce a block
+    PRODUCER="$(echo $MINA_STATUS | jq .next_block_production.timing[0])"
+    if [[ "$PRODUCER" == "\"Produce\"" ]]; then
+      NEXTPROP="$(echo $MINA_STATUS | jq .next_block_production.timing[1].time)"
+      NEXTPROP="${NEXTPROP:1}"
+      NEXTPROP="${NEXTPROP:0:-1}"
+      NOW="$(date +%s%N | cut -b1-13)"
+      TIMEBEFORENEXT="$(($NEXTPROP-$NOW))"
+      TIMEBEFORENEXTSEC="${TIMEBEFORENEXT:0:-3}"
+      TIMEBEFORENEXTMIN="$((${TIMEBEFORENEXTSEC} / ${SECONDS_PER_MINUTE}))"
+      if [ $TIMEBEFORENEXTMIN -lt 5 ]; then
+        echo "Stop snarking"
+        mina client set-snark-worker
+        ((SNARKWORKERTURNEDOFF++))
+      else
+        if [[ "$SNARKWORKERTURNEDOFF" -gt 0 ]]; then
+            mina client set-snark-worker -address ${SW_ADDRESS}
+            mina client set-snark-work-fee $FEE
+            SNARKWORKERTURNEDOFF=0
+        fi
+      fi
+    else
+      if [[ "$SNARKWORKERTURNEDOFF" -gt 0 ]]; then
+          mina client set-snark-worker -address ${SW_ADDRESS}
+          mina client set-snark-work-fee $FEE
+          SNARKWORKERTURNEDOFF=0
+      fi
     fi
   fi
 
