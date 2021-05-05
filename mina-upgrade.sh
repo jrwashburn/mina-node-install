@@ -16,7 +16,7 @@ sudo apt-get -y update
 sudo apt-get install -y curl unzip $MINA_VERSION
 sudo apt-get install -y $ARCHIVE_VERSION
 sudo apt-get install -y $SIDECAR_VERSION
-sudo cp mina-node-install/partial-configs/mina-sidecar.json /etc/
+sudo cp partial-configs/mina-sidecar.json /etc/
 
 systemctl --user daemon-reload
 systemctl --user start mina-archive.service
