@@ -8,9 +8,9 @@ YOUR_LEDGER_ARCHIVE_DIRECTORY=/home/minar/ledger-archives
 THE_SEEDS_URL=https://storage.googleapis.com/mina-seed-lists/mainnet_seeds.txt
 YOUR_WALLET_FILE=~/keys/my-wallet
 YOUR_COINBASE_RECEIVER=B62qoigHEtJCoZ5ekbGHWyr9hYfc6fkZ2A41h9vvVZuvty9amzEz3yB
-MINA_VERSION=mina-mainnet=1.1.3-48401e9
-ARCHIVE_VERSION=mina-archive=1.1.3-48401e9
-SIDECAR_VERSION=mina-bp-stats-sidecar=1.1.3-48401e9
+MINA_VERSION=mina-mainnet=1.1.5-a42bdee
+ARCHIVE_VERSION=mina-archive=1.1.5-a42bdee
+SIDECAR_VERSION=mina-bp-stats-sidecar=1.1.5-a42bdee
 
 YOUR_HOST_IP="$(curl https://api.ipify.org)"
 
