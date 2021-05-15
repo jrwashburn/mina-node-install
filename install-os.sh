@@ -13,7 +13,7 @@ cp partial-configs/sshd_config /etc/ssh/sshd_config
 
 adduser minar
 usermod -aG sudo minar
-
+usermod -aG systemd-journal minar
 mkdir -p /home/minar/.ssh
 chown minar:minar /home/minar/.ssh
 sudo cp /root/.ssh/authorized_keys /home/minar/.ssh/authorized_keys
