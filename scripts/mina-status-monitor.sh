@@ -1,7 +1,6 @@
 #Credit to _thanos for the original snarkstopper - https://forums.minaprotocol.com/t/guide-script-automagically-stops-snark-work-prior-of-getting-a-block-proposal/299
 MINA_STATUS=""
 STAT=""
-ARCHIVESTAT=0
 CONNECTINGCOUNT=0
 OFFLINECOUNT=0
 CATHCUPCOUNT=0
@@ -30,7 +29,7 @@ while :; do
   # to enable sidecar monitoring, the user requires journalctl rights
   # this command will provide access, but requires you to log out and log back in / restart service
   # sudo usermod -aG systemd-journal [USER]
-  # SIDECARREPORTING="$(journalctl | grep python3 | tail -40 | grep -c 'Got block data')"
+  # SIDECARREPORTING="$(journalctl --user -r -n 45 -u mina-sidecar.service | grep -c 'Got block data')"
   
   STAT="$(echo $MINA_STATUS | jq .sync_status)"
   HIGHESTBLOCK="$(echo $MINA_STATUS | jq .highest_block_length_received)"
@@ -140,7 +139,7 @@ while :; do
     systemctl --user restart mina-archive.service
   fi
 
-  # if [[ "$SIDECARREPORTING" -lt 10 ]]
+  # if [[ "$SIDECARREPORTING" -lt 10 ]]; then
   #  echo "May need to restart mina-sidecar - only reporting Got block data" $SIDECARREPORTING "times out of last 40 python log msgs"
   #  systemctl --user restart mina-sidecar.service
   # fi
