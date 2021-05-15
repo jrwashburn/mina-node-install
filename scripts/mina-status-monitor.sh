@@ -3,7 +3,7 @@ MINA_STATUS=""
 STAT=""
 CONNECTINGCOUNT=0
 OFFLINECOUNT=0
-CATHCUPCOUNT=0
+CATCHUPCOUNT=0
 HEIGHTOFFCOUNT=0
 SIDECARREPORTING=0
 TOTALCONNECTINGCOUNT=0
@@ -95,7 +95,7 @@ while :; do
   if [[ "$STAT" == "\"Synced\"" ]]; then
     OFFLINECOUNT=0
     CONNECTINGCOUNT=0
-    CATHCUPCOUNT=0
+    CATCHUPCOUNT=0
   fi
 
   if [[ "$STAT" == "\"Connecting\"" ]]; then
@@ -109,8 +109,8 @@ while :; do
   fi
 
   if [[ "$STAT" == "\"Catchup\"" ]]; then
-    ((CATHCUPCOUNT++))
-    ((TOTALCATHCUPCOUNT++))
+    ((CATCHUPCOUNT++))
+    ((TOTALCATCHUPCOUNT++))
   fi
 
   if [[ "$CONNECTINGCOUNT" -gt 1 ]]; then
@@ -132,7 +132,7 @@ while :; do
   fi
 
   if [[ "$ARCHIVERUNNING" -gt 0 ]]; then
-    ARCHIVERRUNNING=0
+    ARCHIVERUNNING=0
   else
     ((ARCHIVEDOWNCOUNT++))
     echo "Restarting Mina-Archive Service. Archive Down Count:", $ARCHIVEDOWNCOUNT
