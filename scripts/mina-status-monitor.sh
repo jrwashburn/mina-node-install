@@ -147,5 +147,5 @@ while :; do
   echo "Status:" $STAT, "Connecting Count, Total:" $CONNECTINGCOUNT $TOTALCONNECTINGCOUNT, "Offline Count, Total:" $OFFLINECOUNT $TOTALOFFLINECOUNT, "Archive Down Count:" $ARCHIVEDOWNCOUNT, "Node Stuck Below Tip:" $TOTALSTUCKCOUNT, "Total Catchup:" $TOTALCATCHUPCOUNT, "Total Height Mismatch:" $TOTALHEIGHTOFFCOUNT, "Time Until Block:" $TIMEBEFORENEXTMIN
   sleep 300s
   #check if sleep exited with break (ctrl+c) to exit the loop
-  test $? -gt 128 && breqak;
+  test $? -gt 128 && break;
 done
