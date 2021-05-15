@@ -1,13 +1,20 @@
 #Credit to _thanos for the original snarkstopper - https://forums.minaprotocol.com/t/guide-script-automagically-stops-snark-work-prior-of-getting-a-block-proposal/299
 MINA_STATUS=""
 STAT=""
-ARCHIVESTAT=0
 CONNECTINGCOUNT=0
 OFFLINECOUNT=0
+CATCHUPCOUNT=0
+HEIGHTOFFCOUNT=0
+SIDECARREPORTING=0
 TOTALCONNECTINGCOUNT=0
 TOTALOFFLINECOUNT=0
-TOTALSTUCK=0
+TOTALSTUCKCOUNT=0
+TOTALCATCHUPCOUNT=0
+TOTALHEIGHTOFFCOUNT=0
 ARCHIVEDOWNCOUNT=0
+BLOCKCHAINLENGTH=0
+DELTAVALIDATED=0
+DELTAHEIGHT=0
 SNARKWORKERTURNEDOFF=1 ### assume snark worker not turned on for the first run
 SNARKWORKERSTOPPEDCOUNT=0
 readonly SECONDS_PER_MINUTE=60
@@ -16,12 +23,18 @@ readonly FEE=YOUR_SW_FEE ### SET YOUR SNARK WORKER FEE HERE ###
 readonly SW_ADDRESS=YOUR_SW_ADDRESS ### SET YOUR SNARK WORKER ADDRESS HERE ###
 
 while :; do
+  ARCHIVERUNNING="$(ps -A | grep coda-archive | wc -l)"
   MINA_STATUS="$(mina client status -json)"
 
+  # to enable sidecar monitoring, the user requires journalctl rights
+  # this command will provide access, but requires you to log out and log back in / restart service
+  # sudo usermod -aG systemd-journal [USER]
+  # SIDECARREPORTING="$(journalctl --user -r -n 45 -u mina-sidecar.service | grep -c 'Got block data')"
+  
   STAT="$(echo $MINA_STATUS | jq .sync_status)"
   HIGHESTBLOCK="$(echo $MINA_STATUS | jq .highest_block_length_received)"
   HIGHESTUNVALIDATEDBLOCK="$(echo $MINA_STATUS | jq .highest_unvalidated_block_length_received)"
-  ARCHIVERUNNING=`ps -A | grep coda-archive | wc -l`
+  BLOCKCHAINLENGTH="$(echo $MINA_STATUS | jq .blockchain_length)"
 
   if [[ "$STAT" == "\"Synced\"" ]]; then
     # Calculate whether block producer will run within the next 5 mins
@@ -54,21 +67,35 @@ while :; do
           SNARKWORKERTURNEDOFF=0
       fi
     fi
+
+    # if in sync, confirm that blockchain length ~= max observed
+    DELTAHEIGHT="$(($BLOCKCHAINLENGTH-$HIGHESTBLOCK))"
+    if [[ "$DELTAHEIGHT" -gt 3 ]] || [[ "$DELTAHEIGHT" -lt -3 ]]; then
+      ((HEIGHTOFFCOUNT++))
+    else  
+      HEIGHTOFFCOUNT=0
+    fi 
   fi
 
   # Calculate difference between validated and unvalidated blocks
   # If block height is more than 10 block behind, somthing is likely wrong
   DELTAVALIDATED="$(($HIGHESTUNVALIDATEDBLOCK-$HIGHESTBLOCK))"
-  echo "DELTA VALIDATE: ", $DELTAVALIDATED
   if [[ "$DELTAVALIDATED" -gt 5 ]]; then
-    echo "Node stuck validated block height delta more than 5 blocks"
-    ((TOTALSTUCK++))
+    echo "Node stuck validated block height delta more than 5 blocks. Difference from Max obvserved and max observied unvalidated:", $DELTAVALIDATED
+    ((TOTALSTUCKCOUNT++))
+    systemctl --user restart mina
+  fi
+
+  if [[ "$HEIGHTOFFCOUNT" -gt 2 ]]; then
+    echo "Block Chain Length differs from Highest Observed Block by 3 or more", $DELTAHEIGHT, $BLOCKCHAINLENGTH, $HIGHESTBLOCK, $HIGHESTUNVALIDATEDBLOCK
+    ((TOTALHEIGHTOFFCOUNT++))
     systemctl --user restart mina
   fi
 
   if [[ "$STAT" == "\"Synced\"" ]]; then
     OFFLINECOUNT=0
     CONNECTINGCOUNT=0
+    CATCHUPCOUNT=0
   fi
 
   if [[ "$STAT" == "\"Connecting\"" ]]; then
@@ -81,22 +108,43 @@ while :; do
     ((TOTALOFFLINECOUNT++))
   fi
 
+  if [[ "$STAT" == "\"Catchup\"" ]]; then
+    ((CATCHUPCOUNT++))
+    ((TOTALCATCHUPCOUNT++))
+  fi
+
   if [[ "$CONNECTINGCOUNT" -gt 1 ]]; then
+    echo "Restarting mina - too long in Connecting state (~10 mins)"
     systemctl --user restart mina
     CONNECTINGCOUNT=0
   fi
 
   if [[ "$OFFLINECOUNT" -gt 3 ]]; then
+    echo "Restarting mina - too long in Offline state (~20 mins)"
+    systemctl --user restart mina
+    OFFLINECOUNT=0
+  fi
+
+  if [[ "$CATCHUPCOUNT" -gt 8 ]]; then
+    echo "Restarting mina - too long in Catchup state (~45 mins)"
     systemctl --user restart mina
     OFFLINECOUNT=0
   fi
 
   if [[ "$ARCHIVERUNNING" -gt 0 ]]; then
-    ARCHIVERRUNNING=0
+    ARCHIVERUNNING=0
   else
     ((ARCHIVEDOWNCOUNT++))
+    echo "Restarting Mina-Archive Service. Archive Down Count:", $ARCHIVEDOWNCOUNT
+    systemctl --user restart mina-archive.service
   fi
-  echo "Status:" $STAT, "Connecting Count, Total:" $CONNECTINGCOUNT $TOTALCONNECTINGCOUNT, "Offline Count, Total:" $OFFLINECOUNT $TOTALOFFLINECOUNT, "Archive Down Count:" $ARCHIVEDOWNCOUNT, "Node Stuck Below Tip:" $TOTALSTUCK, "Time Until Block:" $TIMEBEFORENEXTMIN
+
+  # if [[ "$SIDECARREPORTING" -lt 10 ]]; then
+  #  echo "May need to restart mina-sidecar - only reporting Got block data" $SIDECARREPORTING "times out of last 40 python log msgs"
+  #  systemctl --user restart mina-sidecar.service
+  # fi
+
+  echo "Status:" $STAT, "Connecting Count, Total:" $CONNECTINGCOUNT $TOTALCONNECTINGCOUNT, "Offline Count, Total:" $OFFLINECOUNT $TOTALOFFLINECOUNT, "Archive Down Count:" $ARCHIVEDOWNCOUNT, "Node Stuck Below Tip:" $TOTALSTUCKCOUNT, "Total Catchup:" $TOTALCATCHUPCOUNT, "Total Height Mismatch:" $TOTALHEIGHTOFFCOUNT, "Time Until Block:" $TIMEBEFORENEXTMIN
   sleep 300s
   #check if sleep exited with break (ctrl+c) to exit the loop
   test $? -gt 128 && break;

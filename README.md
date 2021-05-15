@@ -10,7 +10,7 @@ There are two main install scripts
 ## install-os script
 This script prepares the basics on a new node:  
 - creates user [minar]
-- grants sudo  
+- grants sudo and systemd-journal
 - changes ssh port and restricts to new users
 - disables root login  
 - installs ufw and blocks all inbound except ssh (**moved to 1932**), 8302 for p2p  
@@ -31,6 +31,7 @@ This script will install mina and setup systemd units for mina, mina-archive, mi
 - mina.service unit to override standard install parameters. Mina installs a systemd config at /usr/lib/systemd/user/mina.service which is updated with each install. To supply your own overrides, this places a mina.service in /etc/systemd/user with parameters from this script.
 - mina-archive.service unit to run the mina-archive service on the same node. This requires a postgres database that has been setup as per https://minaprotocol.com/docs/advanced/archive-node and is accessible from the node.
 - mina-status-monitor.service unit checks mina client status ever 5 minutes for health check. This unit runs the mina-status-monitor.sh script which incorporates a snark starter / stopper (**this should be modified if you are running as a coordinator**). This script will also **restart your mina daemon** if it detects that the node is "stuck" more than 10 blocks behind the highest tip it has seen, if it gets stays in status connecting for more than 10 minutes, or is offline for more than 15 minutes (should never occur.) In the future, this c/should be updated to generate alerts.
+    - status monitor will also check on and restart sidecare. currently, this is commented out, but if you uncomment lins 32 and 142-145, it will check on sidecar and attempt to restart it if it hasn't reported enough blocks. The number of successful reports may need to be tweaked based on experience so it's commented for now. 
 - mina-staking-ledgers-archive.service unit dumps current and next staking ledger daily for mina-pool-payout. This runs a mina-export-ledgers.sh script, which dumps the current and next staking ledger, calculates their hash, and renames them by their hash. https://github.com/jrwashburn/mina-pool-payout will be able to use those files for the payout calculation. 
 
 These parameters are at the top of the install mina script and should be overwritten as well:
