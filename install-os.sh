@@ -2,6 +2,7 @@
 INSTALL_UFW=true
 INSTALL_PROMETHEUS=true
 INSTALL_NODEJS=true
+INSTALL_GCLOUD=true
 YOUR_GRAFANA_REMOTE_WRITE_ENDPOINT="https://prometheus-us-central1.grafana.net/api/prom/push"
 YOUR_GRAFANA_METRICS_INSTANCE_ID=**********
 YOUR_GRAFANA_API_KEY=**********
@@ -23,8 +24,17 @@ sudo systemctl restart sshd
 
 sudo apt -y update
 sudo apt -y full-upgrade
-sudo apt-get install -y apt-transport-https
+sudo apt-get install -y apt-transport-https ca-certificates gnupg
 sudo apt-get install -y curl
+
+if $INSTALL_GCLOUD
+then
+    echo "deb [signed-by=/usr/share/keyrings/cloud.google.gpg] https://packages.cloud.google.com/apt cloud-sdk main" | sudo tee -a /etc/apt/sources.list.d/google-cloud-sdk.list
+    curl https://packages.cloud.google.com/apt/doc/apt-key.gpg | sudo apt-key --keyring /usr/share/keyrings/cloud.google.gpg add -
+    sudo apt-get -y update && sudo apt-get install -y  google-cloud-sdk
+    #you will have to login to google and get a token
+    gcloud init
+fi
 
 if $INSTALL_UFW
 then

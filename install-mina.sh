@@ -11,6 +11,10 @@ YOUR_COINBASE_RECEIVER=B62qoigHEtJCoZ5ekbGHWyr9hYfc6fkZ2A41h9vvVZuvty9amzEz3yB
 MINA_VERSION=mina-mainnet=1.1.5-a42bdee
 ARCHIVE_VERSION=mina-archive=1.1.5-a42bdee
 SIDECAR_VERSION=mina-bp-stats-sidecar=1.1.5-a42bdee
+INSTALL_GCLOUD=true
+GCS_KEYS=~/keys/my-gcs.json
+YOUR_GCS_NETWORK_NAME=mainnet
+GCS_BUCKET=mina-mainnet-blocks
 
 YOUR_HOST_IP="$(curl https://api.ipify.org)"
 
@@ -28,6 +32,12 @@ sed -i "s/YOUR_SW_ADDRESS/$YOUR_SW_ADDRESS/g" partial-configs/mina-env
 sed -i "s/YOUR_SW_FEE/$YOUR_SW_FEE/g" partial-configs/mina-env
 sed -i "s/YOUR_COINBASE_RECEIVER/$YOUR_COINBASE_RECEIVER/g" partial-configs/mina-env
 sed -i "s/YOUR_HOST_IP/$YOUR_HOST_IP/g" partial-configs/mina-env
+if $INSTALL_GCLOUD
+then
+    sed -i "s^GCS_KEYS^$GCS_KEYS^g" partial-configs/mina-env
+    sed -i "s^YOUR_GCS_NETWORK_NAME^$YOUR_GCS_NETWORK_NAME^g" partial-configs/mina-env 
+    sed -i "s^GCS_BUCKET^$GCS_BUCKET^g" partial-configs/mina-env
+fi
 
 sudo cp scripts/mina-status-monitor.sh /usr/local/bin/mina-status-monitor.sh
 sudo cp scripts/mina-export-ledgers.sh /usr/local/bin/mina-export-ledgers.sh
