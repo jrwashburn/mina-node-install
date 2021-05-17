@@ -143,6 +143,7 @@ while :; do
 
   if [[ "$SIDECARREPORTING" -lt 3 && "$SYNCCOUNT" -gt 2 ]]; then
     echo "Restarting mina-sidecar - only reported " $SIDECARREPORTING " times out in 10 mins and node in sync longer than 15 mins."
+    SYNCCOUNT=0
     systemctl --user restart mina-sidecar.service
   fi
 
