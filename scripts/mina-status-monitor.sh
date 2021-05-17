@@ -104,16 +104,19 @@ while :; do
   if [[ "$STAT" == "\"Connecting\"" ]]; then
     ((CONNECTINGCOUNT++))
     ((TOTALCONNECTINGCOUNT++))
-  fi
+    SYNCCOUNT=0
+   fi
 
   if [[ "$STAT" == "\"Offline\"" ]]; then
     ((OFFLINECOUNT++))
     ((TOTALOFFLINECOUNT++))
+    SYNCCOUNT=0
   fi
 
   if [[ "$STAT" == "\"Catchup\"" ]]; then
     ((CATCHUPCOUNT++))
     ((TOTALCATCHUPCOUNT++))
+    SYNCCOUNT=0
   fi
 
   if [[ "$CONNECTINGCOUNT" -gt 1 ]]; then
