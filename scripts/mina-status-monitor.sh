@@ -15,6 +15,7 @@ ARCHIVEDOWNCOUNT=0
 BLOCKCHAINLENGTH=0
 DELTAVALIDATED=0
 DELTAHEIGHT=0
+SYNCCOUNT=0
 SNARKWORKERTURNEDOFF=1 ### assume snark worker not turned on for the first run
 SNARKWORKERSTOPPEDCOUNT=0
 readonly SECONDS_PER_MINUTE=60
@@ -29,7 +30,7 @@ while :; do
   # to enable sidecar monitoring, the user requires journalctl rights
   # this command will provide access, but requires you to log out and log back in / restart service
   # sudo usermod -aG systemd-journal [USER]
-  # SIDECARREPORTING="$(journalctl --user -r -n 45 -u mina-sidecar.service | grep -c 'Got block data')"
+  SIDECARREPORTING="$(journalctl --user-unit mina-sidecar.service --since "10 minutes ago" | grep -c 'Got block data')"
   
   STAT="$(echo $MINA_STATUS | jq .sync_status)"
   HIGHESTBLOCK="$(echo $MINA_STATUS | jq .highest_block_length_received)"
@@ -96,6 +97,7 @@ while :; do
     OFFLINECOUNT=0
     CONNECTINGCOUNT=0
     CATCHUPCOUNT=0
+    ((SYNCCOUNT++))
   fi
 
   if [[ "$STAT" == "\"Connecting\"" ]]; then
@@ -139,10 +141,10 @@ while :; do
     systemctl --user restart mina-archive.service
   fi
 
-  # if [[ "$SIDECARREPORTING" -lt 10 ]]; then
-  #  echo "May need to restart mina-sidecar - only reporting Got block data" $SIDECARREPORTING "times out of last 40 python log msgs"
-  #  systemctl --user restart mina-sidecar.service
-  # fi
+  if [[ "$SIDECARREPORTING" -lt 3 ]] && [[ "$SYNCCOUNT" -gt 3]]; then
+    echo "Restarting mina-sidecar - only reported " $SIDECARREPORTING " times out in 10 mins and node in sync longer than 15 mins."
+    systemctl --user restart mina-sidecar.service
+  fi
 
   echo "Status:" $STAT, "Connecting Count, Total:" $CONNECTINGCOUNT $TOTALCONNECTINGCOUNT, "Offline Count, Total:" $OFFLINECOUNT $TOTALOFFLINECOUNT, "Archive Down Count:" $ARCHIVEDOWNCOUNT, "Node Stuck Below Tip:" $TOTALSTUCKCOUNT, "Total Catchup:" $TOTALCATCHUPCOUNT, "Total Height Mismatch:" $TOTALHEIGHTOFFCOUNT, "Time Until Block:" $TIMEBEFORENEXTMIN
   sleep 300s
