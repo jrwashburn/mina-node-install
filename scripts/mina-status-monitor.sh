@@ -84,6 +84,7 @@ while :; do
   if [[ "$DELTAVALIDATED" -gt 5 ]]; then
     echo "Node stuck validated block height delta more than 5 blocks. Difference from Max obvserved and max observied unvalidated:", $DELTAVALIDATED
     ((TOTALSTUCKCOUNT++))
+    SYNCCOUNT=0
     systemctl --user restart mina
   fi
 
@@ -119,18 +120,21 @@ while :; do
     echo "Restarting mina - too long in Connecting state (~10 mins)"
     systemctl --user restart mina
     CONNECTINGCOUNT=0
+    SYNCCOUNT=0
   fi
 
   if [[ "$OFFLINECOUNT" -gt 3 ]]; then
     echo "Restarting mina - too long in Offline state (~20 mins)"
     systemctl --user restart mina
     OFFLINECOUNT=0
+    SYNCCOUNT=0
   fi
 
   if [[ "$CATCHUPCOUNT" -gt 8 ]]; then
     echo "Restarting mina - too long in Catchup state (~45 mins)"
     systemctl --user restart mina
-    OFFLINECOUNT=0
+    CATCHUPCOUNT=0
+    SYNCCOUNT=0  
   fi
 
   if [[ "$ARCHIVERUNNING" -gt 0 ]]; then
