@@ -15,7 +15,11 @@ ARCHIVEDOWNCOUNT=0
 BLOCKCHAINLENGTH=0
 DELTAVALIDATED=0
 DELTAHEIGHT=0
+DELTAME=0
 SYNCCOUNT=0
+MINAEXPLORERBLOCKCHAINLENGTH=0
+VSMECOUNT=0
+TOTALVSMECOUNT=0
 SNARKWORKERTURNEDOFF=1 ### assume snark worker not turned on for the first run
 SNARKWORKERSTOPPEDCOUNT=0
 readonly SECONDS_PER_MINUTE=60
@@ -36,6 +40,7 @@ while :; do
   HIGHESTBLOCK="$(echo $MINA_STATUS | jq .highest_block_length_received)"
   HIGHESTUNVALIDATEDBLOCK="$(echo $MINA_STATUS | jq .highest_unvalidated_block_length_received)"
   BLOCKCHAINLENGTH="$(echo $MINA_STATUS | jq .blockchain_length)"
+  MINAEXPLORERBLOCKCHAINLENGTH="$(curl https://api.minaexplorer.com | jq .blockchainLength)"
 
   if [[ "$STAT" == "\"Synced\"" ]]; then
     # Calculate whether block producer will run within the next 5 mins
@@ -76,7 +81,15 @@ while :; do
     else  
       HEIGHTOFFCOUNT=0
     fi 
-  fi
+
+    # also check if we are within a few blocks of what ME is showing
+    DELTAME="$(($BLOCKCHAINLENGTH-$MINAEXPLORERBLOCKCHAINLENGTH))"
+    if [[ "$DELTAME" -gt 5 ]] || [[ "$DELTAME" -lt -5 ]]; then
+      ((VSMECOUNT++))
+    else  
+      VSMECOUNT=0
+    fi 
+fi
 
   # Calculate difference between validated and unvalidated blocks
   # If block height is more than 10 block behind, somthing is likely wrong
@@ -89,8 +102,14 @@ while :; do
   fi
 
   if [[ "$HEIGHTOFFCOUNT" -gt 2 ]]; then
-    echo "Block Chain Length differs from Highest Observed Block by 3 or more", $DELTAHEIGHT, $BLOCKCHAINLENGTH, $HIGHESTBLOCK, $HIGHESTUNVALIDATEDBLOCK
+    echo "Restarting mina - Block Chain Length differs from Highest Observed Block by 3 or more", $DELTAHEIGHT, $BLOCKCHAINLENGTH, $HIGHESTBLOCK, $HIGHESTUNVALIDATEDBLOCK, $MINAEXPLORERBLOCKCHAINLENGTH, $DELTAME
     ((TOTALHEIGHTOFFCOUNT++))
+    systemctl --user restart mina
+  fi
+
+  if [[ "$VSMECOUNT" -gt 5 ]]; then
+    echo "Restarting mina - Block Chain Length differs by more than 5 from Mina Explorer API for over 25 mins", $DELTAHEIGHT, $BLOCKCHAINLENGTH, $HIGHESTBLOCK, $HIGHESTUNVALIDATEDBLOCK, $MINAEXPLORERBLOCKCHAINLENGTH, $DELTAME
+    ((TOTALVSMECOUNT++))
     systemctl --user restart mina
   fi
 
@@ -144,7 +163,7 @@ while :; do
     ARCHIVERUNNING=0
   else
     ((ARCHIVEDOWNCOUNT++))
-    echo "Restarting Mina-Archive Service. Archive Down Count:", $ARCHIVEDOWNCOUNT
+    echo "Restarting mina-Archive Service. Archive Down Count:", $ARCHIVEDOWNCOUNT
     systemctl --user restart mina-archive.service
   fi
 
