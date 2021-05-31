@@ -40,7 +40,7 @@ while :; do
   HIGHESTBLOCK="$(echo $MINA_STATUS | jq .highest_block_length_received)"
   HIGHESTUNVALIDATEDBLOCK="$(echo $MINA_STATUS | jq .highest_unvalidated_block_length_received)"
   BLOCKCHAINLENGTH="$(echo $MINA_STATUS | jq .blockchain_length)"
-  MINAEXPLORERBLOCKCHAINLENGTH="$(curl https://api.minaexplorer.com | jq .blockchainLength)"
+  MINAEXPLORERBLOCKCHAINLENGTH="$(curl -s https://api.minaexplorer.com | jq .blockchainLength)"
 
   if [[ "$STAT" == "\"Synced\"" ]]; then
     # Calculate whether block producer will run within the next 5 mins
