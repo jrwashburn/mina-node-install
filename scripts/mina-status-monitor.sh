@@ -40,7 +40,7 @@ while :; do
   HIGHESTBLOCK="$(echo $MINA_STATUS | jq .highest_block_length_received)"
   HIGHESTUNVALIDATEDBLOCK="$(echo $MINA_STATUS | jq .highest_unvalidated_block_length_received)"
   BLOCKCHAINLENGTH="$(echo $MINA_STATUS | jq .blockchain_length)"
-  MINAEXPLORERBLOCKCHAINLENGTH="$(curl -s https://api.minaexplorer.com | jq .blockchainLength)"
+  # MINAEXPLORERBLOCKCHAINLENGTH="$(curl -s https://api.minaexplorer.com | jq .blockchainLength)"
 
   if [[ "$STAT" == "\"Synced\"" ]]; then
     # Calculate whether block producer will run within the next 5 mins
@@ -83,12 +83,12 @@ while :; do
     fi 
 
     # also check if we are within a few blocks of what ME is showing
-    DELTAME="$(($BLOCKCHAINLENGTH-$MINAEXPLORERBLOCKCHAINLENGTH))"
-    if [[ "$DELTAME" -gt 5 ]] || [[ "$DELTAME" -lt -5 ]]; then
-      ((VSMECOUNT++))
-    else  
-      VSMECOUNT=0
-    fi 
+    # DELTAME="$(($BLOCKCHAINLENGTH-$MINAEXPLORERBLOCKCHAINLENGTH))"
+    # if [[ "$DELTAME" -gt 5 ]] || [[ "$DELTAME" -lt -5 ]]; then
+    #  ((VSMECOUNT++))
+    #else  
+    #  VSMECOUNT=0
+    #fi 
 fi
 
   # Calculate difference between validated and unvalidated blocks
@@ -107,11 +107,11 @@ fi
     systemctl --user restart mina
   fi
 
-  if [[ "$VSMECOUNT" -gt 5 ]]; then
-    echo "Restarting mina - Block Chain Length differs by more than 5 from Mina Explorer API for over 25 mins", $DELTAHEIGHT, $BLOCKCHAINLENGTH, $HIGHESTBLOCK, $HIGHESTUNVALIDATEDBLOCK, $MINAEXPLORERBLOCKCHAINLENGTH, $DELTAME
-    ((TOTALVSMECOUNT++))
-    systemctl --user restart mina
-  fi
+  #if [[ "$VSMECOUNT" -gt 5 ]]; then
+  #  echo "Restarting mina - Block Chain Length differs by more than 5 from Mina Explorer API for over 25 mins", $DELTAHEIGHT, $BLOCKCHAINLENGTH, $HIGHESTBLOCK, $HIGHESTUNVALIDATEDBLOCK, $MINAEXPLORERBLOCKCHAINLENGTH, $DELTAME
+  #  ((TOTALVSMECOUNT++))
+  #  systemctl --user restart mina
+  #fi
 
   if [[ "$STAT" == "\"Synced\"" ]]; then
     OFFLINECOUNT=0
