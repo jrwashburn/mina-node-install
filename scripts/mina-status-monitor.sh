@@ -92,6 +92,11 @@ while :; do
     #else
     #  VSMECOUNT=0
     #fi
+else
+  # stop snarking if not in sync!
+  echo "Stop snarking"
+  mina client set-snark-worker
+  ((SNARKWORKERTURNEDOFF++))
 fi
 
   # Calculate difference between validated and unvalidated blocks
