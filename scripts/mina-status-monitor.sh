@@ -1,4 +1,7 @@
 #Credit to _thanos for the original snarkstopper - https://forums.minaprotocol.com/t/guide-script-automagically-stops-snark-work-prior-of-getting-a-block-proposal/299
+# maximum number of checks to allow node to stay in catchup (12*5mins = 60 mins)
+CATCHUPWINDOW=12
+
 MINA_STATUS=""
 STAT=""
 CONNECTINGCOUNT=0
@@ -153,8 +156,8 @@ fi
     SYNCCOUNT=0
   fi
 
-  if [[ "$CATCHUPCOUNT" -gt 8 ]]; then
-    echo "Restarting mina - too long in Catchup state (~45 mins)"
+  if [[ "$CATCHUPCOUNT" -gt $CATCHUPWINDOW ]]; then
+    echo "Restarting mina - too long in Catchup state"
     systemctl --user restart mina
     CATCHUPCOUNT=0
     SYNCCOUNT=0
