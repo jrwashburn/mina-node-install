@@ -35,7 +35,7 @@ while :; do
   # this command will provide access, but requires you to log out and log back in / restart service
   # sudo usermod -aG systemd-journal [USER]
   SIDECARREPORTING="$(journalctl --user-unit mina-sidecar.service --since "10 minutes ago" | grep -c 'Got block data')"
-  
+
   STAT="$(echo $MINA_STATUS | jq .sync_status)"
   HIGHESTBLOCK="$(echo $MINA_STATUS | jq .highest_block_length_received)"
   HIGHESTUNVALIDATEDBLOCK="$(echo $MINA_STATUS | jq .highest_unvalidated_block_length_received)"
@@ -78,17 +78,17 @@ while :; do
     DELTAHEIGHT="$(($BLOCKCHAINLENGTH-$HIGHESTBLOCK))"
     if [[ "$DELTAHEIGHT" -gt 3 ]] || [[ "$DELTAHEIGHT" -lt -3 ]]; then
       ((HEIGHTOFFCOUNT++))
-    else  
+    else
       HEIGHTOFFCOUNT=0
-    fi 
+    fi
 
     # also check if we are within a few blocks of what ME is showing
     # DELTAME="$(($BLOCKCHAINLENGTH-$MINAEXPLORERBLOCKCHAINLENGTH))"
     # if [[ "$DELTAME" -gt 5 ]] || [[ "$DELTAME" -lt -5 ]]; then
     #  ((VSMECOUNT++))
-    #else  
+    #else
     #  VSMECOUNT=0
-    #fi 
+    #fi
 fi
 
   # Calculate difference between validated and unvalidated blocks
@@ -104,6 +104,7 @@ fi
   if [[ "$HEIGHTOFFCOUNT" -gt 2 ]]; then
     echo "Restarting mina - Block Chain Length differs from Highest Observed Block by 3 or more", $DELTAHEIGHT, $BLOCKCHAINLENGTH, $HIGHESTBLOCK, $HIGHESTUNVALIDATEDBLOCK, $MINAEXPLORERBLOCKCHAINLENGTH, $DELTAME
     ((TOTALHEIGHTOFFCOUNT++))
+    HEIGHTOFFCOUNT=0
     systemctl --user restart mina
   fi
 
@@ -156,7 +157,7 @@ fi
     echo "Restarting mina - too long in Catchup state (~45 mins)"
     systemctl --user restart mina
     CATCHUPCOUNT=0
-    SYNCCOUNT=0  
+    SYNCCOUNT=0
   fi
 
   if [[ "$ARCHIVERUNNING" -gt 0 ]]; then
