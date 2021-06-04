@@ -1,6 +1,7 @@
 #Credit to _thanos for the original snarkstopper - https://forums.minaprotocol.com/t/guide-script-automagically-stops-snark-work-prior-of-getting-a-block-proposal/299
 # maximum number of checks to allow node to stay in catchup (12*5mins = 60 mins)
 CATCHUPWINDOW=12
+GARBAGE="Using password from environment variable CODA_PRIVKEY_PASS"
 
 MINA_STATUS=""
 STAT=""
@@ -32,7 +33,7 @@ readonly SW_ADDRESS=YOUR_SW_ADDRESS ### SET YOUR SNARK WORKER ADDRESS HERE ###
 
 while :; do
   ARCHIVERUNNING="$(ps -A | grep coda-archive | wc -l)"
-  MINA_STATUS="$(mina client status -json)"
+  MINA_STATUS="$(mina client status -json | grep -v --regexp="$GARBAGE" )"
 
   # to enable sidecar monitoring, the user requires journalctl rights
   # this command will provide access, but requires you to log out and log back in / restart service
