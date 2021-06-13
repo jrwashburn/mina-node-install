@@ -2,7 +2,7 @@
 Description=Mina Staking Ledger Export Timer
 
 [Timer]
-OnCalendar=0/4
+OnCalendar=00/4:00
 Unit=mina-logs-archive.service
 Persistent=true
 
