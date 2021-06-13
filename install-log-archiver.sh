@@ -3,5 +3,5 @@ sudo cp scripts/mina-log-archive-gcs-upload.sh /usr/local/bin/mina-log-archive-g
 sudo chmod +x /usr/local/bin/mina-log-archive-gcs-upload.sh
 sudo cp systemd-units/mina-logs* /etc/systemd/user/
 
-systemctl --user start mina-log-archive.service
-systemctl --user start mina-log-archive.timer
+systemctl --user start mina-logs-archive.service
+systemctl --user start mina-logs-archive.timer
