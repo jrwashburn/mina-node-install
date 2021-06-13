@@ -41,8 +41,10 @@ fi
 
 sudo cp scripts/mina-status-monitor.sh /usr/local/bin/mina-status-monitor.sh
 sudo cp scripts/mina-export-ledgers.sh /usr/local/bin/mina-export-ledgers.sh
+sudo cp scripts/mina-log-archive-gcs-upload.sh /usr/local/bin/mina-log-archive-gcs-upload.sh
 sudo chmod +x /usr/local/bin/mina-status-monitor.sh
 sudo chmod +x /usr/local/bin/mina-export-ledgers.sh
+sudo chmod +x /usr/local/bin/mina-log-archive-gcs-upload.sh
 sudo cp systemd-units/mina* /etc/systemd/user/
 
 cp partial-configs/mina-env ~/.mina-env
