@@ -5,7 +5,7 @@
 echo "Exporting mina logs for $(hostname)"
 mina client export-logs
 for GZLOGFILE in ~/.mina-config/exported_logs/*.tar.gz; do
-  UPLOADFILENAME=$(hostname)$(basename $GZLOGFILE)
+  UPLOADFILENAME=$(hostname)$(echo _)$(basename $GZLOGFILE)
   echo "Uploading $GZLOGFILE to GCS $UPLOADFILENAME"
   gsutil cp $GZLOGFILE gs://mina-node-logs/$UPLOADFILENAME
   if [ $? = 0 ]; then
