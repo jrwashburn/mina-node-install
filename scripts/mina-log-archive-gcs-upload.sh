@@ -2,15 +2,15 @@
 # curl https://packages.cloud.google.com/apt/doc/apt-key.gpg | sudo apt-key --keyring /usr/share/keyrings/cloud.google.gpg add -
 # sudo apt-get -y update && sudo apt-get install -y  google-cloud-sdk
 # gcloud init
-
-echo "Exporting mina logs"
+echo "Exporting mina logs for $(hostname)"
 mina client export-logs
-for gzlogfile in ~/.mina-config/exported_logs/*.tar.gz; do
-  echo "Uploading $gzlogfile to GCS"
-  gsutil cp $gzlogfile gs://mina-node-logs
+for GZLOGFILE in ~/.mina-config/exported_logs/*.tar.gz; do
+  UPLOADFILENAME=$(hostname)$(basename $GZLOGFILE)
+  echo "Uploading $GZLOGFILE to GCS $UPLOADFILENAME"
+  gsutil cp $GZLOGFILE gs://mina-node-logs/$UPLOADFILENAME
   if [ $? = 0 ]; then
-    mv $gzlogfile $gzlogfile.del
+    rm $GZLOGFILE 
   else
-    echo "Uploading $gzlogfile failed - will try again next cycle"
+    echo "Uploading $GZLOGFILE failed - will try again next cycle"
   fi
 done
