@@ -9,6 +9,12 @@ YOUR_GRAFANA_API_KEY=**********
 #provide a unique identifier for each prometheus instance sending data to grafana
 YOUR_MINA_NODE_IDENTIFIER=mina01
 
+sed -i "s^#SystemMaxFileSize=^#SystemMaxFileSize=100M^g" /etc/systemd/journald.conf 
+sed -i "s^#SystemMaxFiles=^#SystemMaxFiles=500^g" /etc/systemd/journald.conf 
+sed -i "s^#MaxFileSec=1month^#MaxFileSec=1week^g" /etc/systemd/journald.conf 
+mkdir /var/log/journal
+systemctl force-reload systemd-journald
+
 cd mina-node-install
 cp partial-configs/sshd_config /etc/ssh/sshd_config
 
