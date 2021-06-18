@@ -1,7 +1,7 @@
 #!/bin/bash -x
-MINA_VERSION=mina-devnet=1.1.6alpha5-f010320
-ARCHIVE_VERSION=mina-archive-devnet=1.1.6alpha5-f010320
-SIDECAR_VERSION=mina-bp-stats-sidecar=1.1.6alpha5-f010320
+MINA_VERSION=mina-devnet=mina-devnet=1.2.0alpha1-8809560
+ARCHIVE_VERSION=mina-archive-devnet=mina-devnet=1.2.0alpha1-8809560
+SIDECAR_VERSION=mina-bp-stats-sidecar=mina-devnet=1.2.0alpha1-8809560
 THE_SEEDS_URL=https://storage.googleapis.com/seed-lists/devnet_seeds.txt
 
 systemctl --user stop mina-status-monitor.service
