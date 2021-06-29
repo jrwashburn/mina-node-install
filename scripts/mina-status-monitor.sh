@@ -24,8 +24,13 @@ SYNCCOUNT=0
 MINAEXPLORERBLOCKCHAINLENGTH=0
 VSMECOUNT=0
 TOTALVSMECOUNT=0
-SNARKWORKERTURNEDOFF=1 ### assume snark worker not turned on for the first run
+SNARKWORKERTURNEDOFF=0 ### assume snark worker not turned on for the first run
 SNARKWORKERSTOPPEDCOUNT=0
+FDCOUNT=0
+FDCHECK=0
+readonly FDINCREMENT=100
+readonly MINAUSER="minar"
+readonly FDLIMIT=$(ulimit -n)
 readonly SECONDS_PER_MINUTE=60
 readonly SECONDS_PER_HOUR=3600
 readonly FEE=YOUR_SW_FEE ### SET YOUR SNARK WORKER FEE HERE ###
@@ -181,6 +186,17 @@ fi
     echo "Restarting mina-sidecar - only reported " $SIDECARREPORTING " times out in 10 mins and node in sync longer than 15 mins."
     SYNCCOUNT=0
     systemctl --user restart mina-sidecar.service
+  fi
+
+  FDCOUNT="$(lsof -u $MINAUSER | wc -l)"
+  if [ $FDCOUNT -gt $FDCHECK ]; then
+    lsof -u $MINAUSER > "/tmp/lsof$(date +%m-%d-%H-%M)".txt
+    FDCHECK=$(( $FDCOUNT + $FDINCREMENT ))
+    if [ $FDLIMIT -lt $FDCHECK ]; then
+      FDINCREMENT=$(( $FDINCREMENT / 2 ))
+      FDCHECK=$(( $FDCOUNT + $FDINCREMENT ))
+    fi
+    echo Logged lsof to /tmp at $FDCOUNT FD - Next log at $FDCHECK FD
   fi
 
   echo "Status:" $STAT, "Connecting Count, Total:" $CONNECTINGCOUNT $TOTALCONNECTINGCOUNT, "Offline Count, Total:" $OFFLINECOUNT $TOTALOFFLINECOUNT, "Archive Down Count:" $ARCHIVEDOWNCOUNT, "Node Stuck Below Tip:" $TOTALSTUCKCOUNT, "Total Catchup:" $TOTALCATCHUPCOUNT, "Total Height Mismatch:" $TOTALHEIGHTOFFCOUNT, "Total Mina Explorer Mismatch:" $TOTALVSMECOUNT, "Time Until Block:" $TIMEBEFORENEXTMIN
