@@ -13,6 +13,7 @@ systemctl --user stop mina-sidecar.service
 #sudo apt-get -y update
 echo "deb [trusted=yes] http://packages.o1test.net stretch beta" | sudo tee /etc/apt/sources.list.d/mina-beta.list
 sudo apt-get -y update
+
 sudo apt-get install -y $MINA_VERSION
 sudo apt-get install -y $ARCHIVE_VERSION
 sudo apt-get install -y $SIDECAR_VERSION
