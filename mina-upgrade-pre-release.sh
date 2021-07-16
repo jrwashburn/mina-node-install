@@ -1,7 +1,7 @@
 #!/bin/bash -x
-MINA_VERSION=mina-devnet=1.2.0beta1-c856692
-ARCHIVE_VERSION=mina-archive-devnet=1.2.0beta1-c856692
-SIDECAR_VERSION=mina-bp-stats-sidecar=1.2.0beta1-c856692
+MINA_VERSION=mina-devnet=1.2.0beta2-c856692
+ARCHIVE_VERSION=mina-archive-devnet=1.2.0beta2-c856692
+SIDECAR_VERSION=mina-bp-stats-sidecar=1.2.0beta2-c856692
 
 THE_SEEDS_URL=https://storage.googleapis.com/seed-lists/devnet_seeds.txt
 
