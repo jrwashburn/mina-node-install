@@ -1,9 +1,10 @@
 #Credit to _thanos for the original snarkstopper - https://forums.minaprotocol.com/t/guide-script-automagically-stops-snark-work-prior-of-getting-a-block-proposal/299
+# Not sure why I'm still doing this in shell...but...we're here now.
 
 #Set Controlling Variables for what status monitor will watch
 #General Parameters
-readonly MONITORCYCLE=300 #how many seconds between mina client status checks
-readonly CATCHUPWINDOW=12 #how many intervals to wait for catchup before restart (12*5mins = 60 mins)
+readonly MONITORCYCLE=300 #how many seconds between mina client status checks (e.g. 60s * 5min = 300)
+readonly CATCHUPWINDOW=12 #how many MONITORCYCLE intervals to wait for catchup before restart (12 * 5mins = 60 mins)
 readonly MAXUNVALIDATEDDELTA=3 #will count as out of compliance if more than this many blocks ahead or behind unvalidated count
 readonly GARBAGE="Using password from environment variable CODA_PRIVKEY_PASS" #strip this out of the status
 
@@ -11,8 +12,8 @@ readonly GARBAGE="Using password from environment variable CODA_PRIVKEY_PASS" #s
 readonly USESNARKSTOPPER=1 #set to 1 to run snark stopper, 0 to turn it off (will stop snarking if not in sync, or producing a block soon)
 SNARKWORKERTURNEDOFF=0 #set to 1 to assume snark worker should always be turned on for first run, otherwise 0
 readonly STOPSNARKINGLESSTHAN=5 #threshold in minutes to stop snarking - if minutes until produce block < this value, will stop snark worker
-readonly FEE=YOUR_SW_FEE ### *** SET YOUR SNARK WORKER FEE HERE *** ###
-readonly SW_ADDRESS=YOUR_SW_ADDRESS ### *** SET YOUR SNARK WORKER ADDRESS HERE *** ###
+readonly FEE=1 #YOUR_SW_FEE ### *** SET YOUR SNARK WORKER FEE HERE *** ###
+readonly SW_ADDRESS=B62qkBqSkXgkirtU3n8HJ9YgwHh3vUD6kGJ5ZRkQYGNPeL5xYL2tL1L #YOUR_SW_ADDRESS ### *** SET YOUR SNARK WORKER ADDRESS HERE *** ###
 
 #Archive Monitoring
 readonly USEARCHIVEMONITOR=1 #set to 1 to monitor archive service, 0 ignores archive monitoring
@@ -24,7 +25,7 @@ readonly USESIDECARMONITOR=1 #set to 1 to monitor sidecar service, 0 ignores sid
 readonly USEMINAEXPLORERMONITOR=1 #set to 1 to compare synced height vs. Mina Explorer reported height, 0 does not check MinaExplorer
 readonly MINAEXPLORERMAXDELTA=3 #number of blocks to tolerate in synced blockheight vs. Mina Explorers reported height
 readonly MINAEXPLORERTOLERANCEWINDOW=5 #how many intervals to wait to restart with coninual out of sync vs. mina explorer
-readonly MINAEXPLORERURL=https://api.minaexplorer.com #url to get status from mina explorer -- devnet: https://devnet.api.minaexplorer.com
+readonly MINAEXPLORERURL=https://devnet.api.minaexplorer.com # https://api.minaexplorer.com #url to get status from mina explorer -- devnet: https://devnet.api.minaexplorer.com
 
 #File Descriptor Monitoring
 readonly USEFILEDESCRIPTORSMONITOR=1 #set to 1 to turn on file descriptor logging, 0 to turn it on
@@ -62,7 +63,49 @@ function INITIALIZEVARS {
   FDINCREMENT=100
 }
 
-function CHECKFILEDESCRIPTORS {
+#################### ADD DOCKER SUPPORT #######################
+function RESTARTMINADAEMON {
+  #if DOCKER .. .do something else ...
+  systemctl --user restart mina
+}
+
+function RESTARTARCHIVESERVICE {
+  #if DOCKER .. .do something else ...
+  systemctl --user restart mina-archive.service
+}
+
+function RESTARTSIDECAR {
+  #if DOCKER .. .do something else ...
+  systemctl --user restart mina-sidecar.service
+}
+
+function STARTSNARKING {
+  mina client set-snark-worker -address ${SW_ADDRESS}
+  mina client set-snark-work-fee $FEE
+}
+
+function STOPSNARKING {
+  mina client set-snark-worker
+}
+
+function GETDAEMONSTATUS {
+  MINA_STATUS="$(mina client status -json | grep -v --regexp="$GARBAGE" )"
+}
+
+function GETSIDECARSTATUS {
+  # to enable sidecar monitoring, the user requires journalctl rights
+  # this command will provide access, but requires you to log out and log back in / restart service
+  # sudo usermod -aG systemd-journal [USER]
+  SIDECARREPORTING="$(journalctl --user-unit mina-sidecar.service --since "10 minutes ago" | grep -c 'Got block data')"
+}
+
+fucntion GETARCHIVESTATUS {
+  ARCHIVERUNNING="$(ps -A | grep coda-archive | wc -l)"
+}
+
+#################### ADD DOCKER SUPPORT #######################
+
+function CHECKFILEDESCRIPTORS { #NOT SUPPORTED FOR DOCKER CURRENTLY
   FDCOUNT="$(lsof -u $MINAUSER | wc -l)"
   if [ $FDCOUNT -gt $FDCHECK ]; then
     lsof -u $MINAUSER > "/tmp/lsof$(date +%m-%d-%H-%M)".txt
@@ -76,25 +119,21 @@ function CHECKFILEDESCRIPTORS {
 }
 
 function CHECKARCHIVE {
-  ARCHIVERUNNING="$(ps -A | grep coda-archive | wc -l)"
+  GETARCHIVESTATUS
   if [[ "$ARCHIVERUNNING" -gt 0 ]]; then
     ARCHIVERUNNING=0
   else
     ((ARCHIVEDOWNCOUNT++))
     echo "Restarting mina-Archive Service. Archive Down Count:", $ARCHIVEDOWNCOUNT
-    systemctl --user restart mina-archive.service
+    RESTARTARCHIVESERVICE
   fi
 }
 
 function CHECKSIDECAR {
-  # to enable sidecar monitoring, the user requires journalctl rights
-  # this command will provide access, but requires you to log out and log back in / restart service
-  # sudo usermod -aG systemd-journal [USER]
-  SIDECARREPORTING="$(journalctl --user-unit mina-sidecar.service --since "10 minutes ago" | grep -c 'Got block data')"
-
+  GETSIDECARSTATUS
   if [[ "$SIDECARREPORTING" -lt 3 && "$SYNCCOUNT" -gt 2 ]]; then
     echo "Restarting mina-sidecar - only reported " $SIDECARREPORTING " times out in 10 mins and node in sync longer than 15 mins."
-    systemctl --user restart mina-sidecar.service
+    RESTARTSIDECAR
   fi
 }
 
@@ -114,19 +153,17 @@ function CHECKSNARKWORKER {
       TIMEBEFORENEXTMIN="$((${TIMEBEFORENEXTSEC} / ${SECONDS_PER_MINUTE}))"
       if [ $TIMEBEFORENEXTMIN -lt $"STOPSNARKINGLESSTHAN" ]; then
         echo "Stop snarking - producing a block soon"
-        mina client set-snark-worker
+        STOPSNARKING
         ((SNARKWORKERTURNEDOFF++))
       else
         if [[ "$SNARKWORKERTURNEDOFF" -gt 0 ]]; then
-            mina client set-snark-worker -address ${SW_ADDRESS}
-            mina client set-snark-work-fee $FEE
+            STARTSNARKING
             SNARKWORKERTURNEDOFF=0
         fi
       fi
     else
       if [[ "$SNARKWORKERTURNEDOFF" -gt 0 ]]; then
-          mina client set-snark-worker -address ${SW_ADDRESS}
-          mina client set-snark-work-fee $FEE
+          STARTSNARKING
           SNARKWORKERTURNEDOFF=0
       fi
     fi
@@ -134,7 +171,7 @@ function CHECKSNARKWORKER {
     # stop snarking if not in sync!
     if [[ ! "$SNARKWORKERTURNEDOFF" -gt 0 ]]; then
       echo "Stop snarking - node is not in sync"
-      mina client set-snark-worker
+      STOPSNARKING
       ((SNARKWORKERTURNEDOFF++))
     fi
   fi
@@ -151,7 +188,7 @@ function CHECKMINAEXPLORER {
   if [[ "$VSMECOUNT" -gt "$MINAEXPLORERTOLERANCEWINDOW" ]]; then
     echo "Restarting mina - block heigh varied from ME too much / too long:", $DELTAHEIGHT, $BLOCKCHAINLENGTH, $HIGHESTBLOCK, $HIGHESTUNVALIDATEDBLOCK, $MINAEXPLORERBLOCKCHAINLENGTH, $DELTAME, $VSMECOUNT
     ((TOTALVSMECOUNT++))
-    systemctl --user restart mina
+    RESTARTMINADAEMON
   fi
 }
 
@@ -169,14 +206,14 @@ function VALIDATEHEIGHTS {
     echo "Node stuck validated block height delta more than 5 blocks. Difference from Max obvserved and max observied unvalidated:", $DELTAVALIDATED
     ((TOTALSTUCKCOUNT++))
     SYNCCOUNT=0
-    systemctl --user restart mina
+    RESTARTMINADAEMON
   fi
 
   if [[ "$HEIGHTOFFCOUNT" -gt 2 ]]; then
     echo "Restarting mina - Block Chain Length differs from Highest Observed Block by 3 or more", $DELTAHEIGHT, $BLOCKCHAINLENGTH, $HIGHESTBLOCK, $HIGHESTUNVALIDATEDBLOCK, $MINAEXPLORERBLOCKCHAINLENGTH, $DELTAME
     ((TOTALHEIGHTOFFCOUNT++))
     HEIGHTOFFCOUNT=0
-    systemctl --user restart mina
+    RESTARTMINADAEMON
   fi
 }
 
@@ -184,7 +221,7 @@ INITIALIZEVARS
 
 while :; do
   KNOWNSTATUS=0
-  MINA_STATUS="$(mina client status -json | grep -v --regexp="$GARBAGE" )"
+  GETDAEMONSTATUS
   STAT="$(echo $MINA_STATUS | jq .sync_status)"
 
   if [[ "$STAT" == "\"Synced\"" ]]; then
@@ -213,7 +250,7 @@ while :; do
   fi
   if [[ "$CONNECTINGCOUNT" -gt 1 ]]; then
     echo "Restarting mina - too long in Connecting state (~10 mins)"
-    systemctl --user restart mina
+    RESTARTMINADAEMON
     CONNECTINGCOUNT=0
   fi
 
@@ -224,7 +261,7 @@ while :; do
   fi
   if [[ "$OFFLINECOUNT" -gt 3 ]]; then
     echo "Restarting mina - too long in Offline state (~20 mins)"
-    systemctl --user restart mina
+    RESTARTMINADAEMON
     OFFLINECOUNT=0
   fi
 
@@ -235,7 +272,7 @@ while :; do
   fi
   if [[ "$CATCHUPCOUNT" -gt $CATCHUPWINDOW ]]; then
     echo "Restarting mina - too long in Catchup state"
-    systemctl --user restart mina
+    RESTARTMINADAEMON
     CATCHUPCOUNT=0
   fi
 
@@ -252,28 +289,28 @@ while :; do
   if [[ "$KNOWNSTATUS" -eq 0 ]]; then
     echo "Returned Status is unkown or not handled." $STAT
     echo "Restarting MINA because status unkown"
-    systemctl --user restart mina
-  fi
+    RESTARTMINADAEMON
+  else
+    if [[ "$USESNARKSTOPPER" -eq 1 ]]; then
+      CHECKSNARKWORKER
+    fi
 
-  if [[ "$USESNARKSTOPPER" -eq 1 ]]; then
-    CHECKSNARKWORKER
-  fi
+    if [[ "$USEARCHIVEMONITOR" -eq 1 ]]; then
+      CHECKARCHIVE
+    fi
 
-  if [[ "$USEARCHIVEMONITOR" -eq 1 ]]; then
-    CHECKARCHIVE
-  fi
-
-  if [[ "$USESIDECARMONITOR" -eq 1 ]]; then
-    CHECKSIDECAR
+    if [[ "$USESIDECARMONITOR" -eq 1 ]]; then
+      CHECKSIDECAR
+    fi
   fi
 
   if [[ "$USEFILEDESCRIPTORSMONITOR" -eq 1 ]]; then
     CHECKFILEDESCRIPTORS
   fi
 
-  echo "Status:" $STAT, "Connecting Count, Total:" $CONNECTINGCOUNT $TOTALCONNECTINGCOUNT, "Offline Count, Total:" $OFFLINECOUNT $TOTALOFFLINECOUNT, "Archive Down Count:" $ARCHIVEDOWNCOUNT, "Node Stuck Below Tip:" $TOTALSTUCKCOUNT, "Total Catchup:" $TOTALCATCHUPCOUNT, "Total Height Mismatch:" $TOTALHEIGHTOFFCOUNT, "Total Mina Explorer Mismatch:" $TOTALVSMECOUNT, "Time Until Block:" $TIMEBEFORENEXTMIN
+  echo date " Status:" $STAT, "Connecting Count, Total:" $CONNECTINGCOUNT $TOTALCONNECTINGCOUNT, "Offline Count, Total:" $OFFLINECOUNT $TOTALOFFLINECOUNT, "Archive Down Count:" $ARCHIVEDOWNCOUNT, "Node Stuck Below Tip:" $TOTALSTUCKCOUNT, "Total Catchup:" $TOTALCATCHUPCOUNT, "Total Height Mismatch:" $TOTALHEIGHTOFFCOUNT, "Total Mina Explorer Mismatch:" $TOTALVSMECOUNT, "Time Until Block:" $TIMEBEFORENEXTMIN
 
-  sleep 300s
+  sleep $MONITORCYCLE
   #check if sleep exited with break (ctrl+c) to exit the loop
   test $? -gt 128 && break;
 done
