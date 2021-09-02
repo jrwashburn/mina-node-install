@@ -21,93 +21,13 @@ readonly USEARCHIVEMONITOR=1 #set to 1 to monitor archive service, 0 ignores arc
 readonly USESIDECARMONITOR=1 #set to 1 to monitor sidecar service, 0 ignores sidecar monitoring
 
 #Compare to Mina Explorer Height
-readonly USEMINAEXPLORERMONITOR=0 #set to 1 to compare synced height vs. Mina Explorer reported height, 0 does not check MinaExplorer
+readonly USEMINAEXPLORERMONITOR=1 #set to 1 to compare synced height vs. Mina Explorer reported height, 0 does not check MinaExplorer
 readonly MINAEXPLORERMAXDELTA=3 #number of blocks to tolerate in synced blockheight vs. Mina Explorers reported height
 readonly MINAEXPLORERTOLERANCEWINDOW=5 #how many intervals to wait to restart with coninual out of sync vs. mina explorer
 
 #File Descriptor Monitoring
-readonly USEFILEDESCRIPTORSMONITOR=0 #set to 1 to turn on file descriptor logging, 0 to turn it on
+readonly USEFILEDESCRIPTORSMONITOR=1 #set to 1 to turn on file descriptor logging, 0 to turn it on
 readonly MINAUSER="minar" #set to userid the mina service runs under (will be used to monitor file descriptor of that user)
-
-
-INITIALIZEVARS
-
-while :; do
-  MINA_STATUS="$(mina client status -json | grep -v --regexp="$GARBAGE" )"
-  STAT="$(echo $MINA_STATUS | jq .sync_status)"
-  HIGHESTBLOCK="$(echo $MINA_STATUS | jq .highest_block_length_received)"
-  HIGHESTUNVALIDATEDBLOCK="$(echo $MINA_STATUS | jq .highest_unvalidated_block_length_received)"
-  BLOCKCHAINLENGTH="$(echo $MINA_STATUS | jq .blockchain_length)"
-
-  if [[ "$STAT" == "\"Synced\"" ]]; then
-    VALIDATEHEIGHTS
-
-    if [[ "$USEMINAEXPLORERMONITOR" eq 1 ]]; then
-      CHECKMINAEXPLORER
-    fi
-
-    OFFLINECOUNT=0
-    CONNECTINGCOUNT=0
-    CATCHUPCOUNT=0
-    ((SYNCCOUNT++))
-  else
-    SYNCCOUNT=0
-  fi
-
-  if [[ "$STAT" == "\"Connecting\"" ]]; then
-    ((CONNECTINGCOUNT++))
-    ((TOTALCONNECTINGCOUNT++))
-  fi
-  if [[ "$CONNECTINGCOUNT" -gt 1 ]]; then
-    echo "Restarting mina - too long in Connecting state (~10 mins)"
-    systemctl --user restart mina
-    CONNECTINGCOUNT=0
-  fi
-
-  if [[ "$STAT" == "\"Offline\"" ]]; then
-    ((OFFLINECOUNT++))
-    ((TOTALOFFLINECOUNT++))
-  fi
-  if [[ "$OFFLINECOUNT" -gt 3 ]]; then
-    echo "Restarting mina - too long in Offline state (~20 mins)"
-    systemctl --user restart mina
-    OFFLINECOUNT=0
-  fi
-
-  if [[ "$STAT" == "\"Catchup\"" ]]; then
-    ((CATCHUPCOUNT++))
-    ((TOTALCATCHUPCOUNT++))
-  fi
-  if [[ "$CATCHUPCOUNT" -gt $CATCHUPWINDOW ]]; then
-    echo "Restarting mina - too long in Catchup state"
-    systemctl --user restart mina
-    CATCHUPCOUNT=0
-  fi
-
-  if [[ "$USESNARKSTOPPER" eq 1 ]]; then
-    CHECKSNARKWORKER
-  fi
-
-  if [[ "$USEARCHIVEMONITOR" eq 1 ]]; then
-    CHECKARCHIVE
-  fi
-
-  if [[ "$USESIDECARMONITOR" eq 1 ]]; then
-    CHECKSIDECAR
-  fi
-
-  if [[ "$USEFILEDESCRIPTORSMONITOR" eq 1 ]]; then
-    CHECKFILEDESCRIPTORS
-  fi
-
-  echo "Status:" $STAT, "Connecting Count, Total:" $CONNECTINGCOUNT $TOTALCONNECTINGCOUNT, "Offline Count, Total:" $OFFLINECOUNT $TOTALOFFLINECOUNT, "Archive Down Count:" $ARCHIVEDOWNCOUNT, "Node Stuck Below Tip:" $TOTALSTUCKCOUNT, "Total Catchup:" $TOTALCATCHUPCOUNT, "Total Height Mismatch:" $TOTALHEIGHTOFFCOUNT, "Total Mina Explorer Mismatch:" $TOTALVSMECOUNT, "Time Until Block:" $TIMEBEFORENEXTMIN
-
-  sleep 300s
-  #check if sleep exited with break (ctrl+c) to exit the loop
-  test $? -gt 128 && break;
-done
-
-
 
 function INITIALIZEVARS {
   readonly SECONDS_PER_MINUTE=60
@@ -209,7 +129,7 @@ function CHECKSNARKWORKER {
     fi
   else
     # stop snarking if not in sync!
-    if [[ ! "$SNARKWORKERTURNEDOFF" -gt 0 ]]
+    if [[ ! "$SNARKWORKERTURNEDOFF" -gt 0 ]]; then
       echo "Stop snarking - node is not in sync"
       mina client set-snark-worker
       ((SNARKWORKERTURNEDOFF++))
@@ -256,3 +176,80 @@ function VALIDATEHEIGHTS {
     systemctl --user restart mina
   fi
 }
+
+INITIALIZEVARS
+
+while :; do
+  MINA_STATUS="$(mina client status -json | grep -v --regexp="$GARBAGE" )"
+  STAT="$(echo $MINA_STATUS | jq .sync_status)"
+  HIGHESTBLOCK="$(echo $MINA_STATUS | jq .highest_block_length_received)"
+  HIGHESTUNVALIDATEDBLOCK="$(echo $MINA_STATUS | jq .highest_unvalidated_block_length_received)"
+  BLOCKCHAINLENGTH="$(echo $MINA_STATUS | jq .blockchain_length)"
+
+  if [[ "$STAT" == "\"Synced\"" ]]; then
+    VALIDATEHEIGHTS
+
+    if [[ "$USEMINAEXPLORERMONITOR" -eq 1 ]]; then
+      CHECKMINAEXPLORER
+    fi
+
+    OFFLINECOUNT=0
+    CONNECTINGCOUNT=0
+    CATCHUPCOUNT=0
+    ((SYNCCOUNT++))
+  else
+    SYNCCOUNT=0
+  fi
+
+  if [[ "$STAT" == "\"Connecting\"" ]]; then
+    ((CONNECTINGCOUNT++))
+    ((TOTALCONNECTINGCOUNT++))
+  fi
+  if [[ "$CONNECTINGCOUNT" -gt 1 ]]; then
+    echo "Restarting mina - too long in Connecting state (~10 mins)"
+    systemctl --user restart mina
+    CONNECTINGCOUNT=0
+  fi
+
+  if [[ "$STAT" == "\"Offline\"" ]]; then
+    ((OFFLINECOUNT++))
+    ((TOTALOFFLINECOUNT++))
+  fi
+  if [[ "$OFFLINECOUNT" -gt 3 ]]; then
+    echo "Restarting mina - too long in Offline state (~20 mins)"
+    systemctl --user restart mina
+    OFFLINECOUNT=0
+  fi
+
+  if [[ "$STAT" == "\"Catchup\"" ]]; then
+    ((CATCHUPCOUNT++))
+    ((TOTALCATCHUPCOUNT++))
+  fi
+  if [[ "$CATCHUPCOUNT" -gt $CATCHUPWINDOW ]]; then
+    echo "Restarting mina - too long in Catchup state"
+    systemctl --user restart mina
+    CATCHUPCOUNT=0
+  fi
+
+  if [[ "$USESNARKSTOPPER" -eq 1 ]]; then
+    CHECKSNARKWORKER
+  fi
+
+  if [[ "$USEARCHIVEMONITOR" -eq 1 ]]; then
+    CHECKARCHIVE
+  fi
+
+  if [[ "$USESIDECARMONITOR" -eq 1 ]]; then
+    CHECKSIDECAR
+  fi
+
+  if [[ "$USEFILEDESCRIPTORSMONITOR" -eq 1 ]]; then
+    CHECKFILEDESCRIPTORS
+  fi
+
+  echo "Status:" $STAT, "Connecting Count, Total:" $CONNECTINGCOUNT $TOTALCONNECTINGCOUNT, "Offline Count, Total:" $OFFLINECOUNT $TOTALOFFLINECOUNT, "Archive Down Count:" $ARCHIVEDOWNCOUNT, "Node Stuck Below Tip:" $TOTALSTUCKCOUNT, "Total Catchup:" $TOTALCATCHUPCOUNT, "Total Height Mismatch:" $TOTALHEIGHTOFFCOUNT, "Total Mina Explorer Mismatch:" $TOTALVSMECOUNT, "Time Until Block:" $TIMEBEFORENEXTMIN
+
+  sleep 300s
+  #check if sleep exited with break (ctrl+c) to exit the loop
+  test $? -gt 128 && break;
+done
