@@ -24,6 +24,7 @@ readonly USESIDECARMONITOR=1 #set to 1 to monitor sidecar service, 0 ignores sid
 readonly USEMINAEXPLORERMONITOR=1 #set to 1 to compare synced height vs. Mina Explorer reported height, 0 does not check MinaExplorer
 readonly MINAEXPLORERMAXDELTA=3 #number of blocks to tolerate in synced blockheight vs. Mina Explorers reported height
 readonly MINAEXPLORERTOLERANCEWINDOW=5 #how many intervals to wait to restart with coninual out of sync vs. mina explorer
+readonly MINAEXPLORERURL=https://api.minaexplorer.com #url to get status from mina explorer -- devnet: https://devnet.api.minaexplorer.com
 
 #File Descriptor Monitoring
 readonly USEFILEDESCRIPTORSMONITOR=1 #set to 1 to turn on file descriptor logging, 0 to turn it on
@@ -139,7 +140,7 @@ function CHECKSNARKWORKER {
 }
 
 function CHECKMINAEXPLORER {
-  MINAEXPLORERBLOCKCHAINLENGTH="$(curl -s https://api.minaexplorer.com | jq .blockchainLength)"
+  MINAEXPLORERBLOCKCHAINLENGTH="$(curl -s "$MINAEXPLORERURL" | jq .blockchainLength)"
   DELTAME="$(($BLOCKCHAINLENGTH-$MINAEXPLORERBLOCKCHAINLENGTH))"
   if [[ "$DELTAME" -gt "$MINAEXPLORERMAXDELTA" ]] || [[ "$DELTAME" -lt -"$MINAEXPLORERMAXDELTA" ]]; then
     ((VSMECOUNT++))
@@ -183,11 +184,11 @@ INITIALIZEVARS
 while :; do
   MINA_STATUS="$(mina client status -json | grep -v --regexp="$GARBAGE" )"
   STAT="$(echo $MINA_STATUS | jq .sync_status)"
-  HIGHESTBLOCK="$(echo $MINA_STATUS | jq .highest_block_length_received)"
-  HIGHESTUNVALIDATEDBLOCK="$(echo $MINA_STATUS | jq .highest_unvalidated_block_length_received)"
-  BLOCKCHAINLENGTH="$(echo $MINA_STATUS | jq .blockchain_length)"
 
   if [[ "$STAT" == "\"Synced\"" ]]; then
+    HIGHESTBLOCK="$(echo $MINA_STATUS | jq .highest_block_length_received)"
+    HIGHESTUNVALIDATEDBLOCK="$(echo $MINA_STATUS | jq .highest_unvalidated_block_length_received)"
+    BLOCKCHAINLENGTH="$(echo $MINA_STATUS | jq .blockchain_length)"
     VALIDATEHEIGHTS
 
     if [[ "$USEMINAEXPLORERMONITOR" -eq 1 ]]; then
