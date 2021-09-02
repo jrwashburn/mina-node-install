@@ -99,7 +99,7 @@ function GETSIDECARSTATUS {
   SIDECARREPORTING="$(journalctl --user-unit mina-sidecar.service --since "10 minutes ago" | grep -c 'Got block data')"
 }
 
-fucntion GETARCHIVESTATUS {
+function GETARCHIVESTATUS {
   ARCHIVERUNNING="$(ps -A | grep coda-archive | wc -l)"
 }
 
