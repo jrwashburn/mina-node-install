@@ -4,6 +4,8 @@ INSTALL_MINA_POOL_PAYOUT=true
 # update your values - these will update the scripts to be installed with these parameters
 YOUR_SW_FEE=0.25
 YOUR_SW_ADDRESS=B62qkBqSkXgkirtU3n8HJ9YgwHh3vUD6kGJ5ZRkQYGNPeL5xYL2tL1L
+#Address to be used to report to uptime service
+YOUR_BP_ADDRESS=B62qkBqSkXgkirtU3n8HJ9YgwHh3vUD6kGJ5ZRkQYGNPeL5xYL2tL1L
 YOUR_LEDGER_ARCHIVE_DIRECTORY=/home/minar/ledger-archives
 THE_SEEDS_URL=https://storage.googleapis.com/mina-seed-lists/mainnet_seeds.txt
 YOUR_WALLET_FILE=~/keys/my-wallet
@@ -18,7 +20,7 @@ GCS_BUCKET=mina-mainnet-blocks
 
 YOUR_HOST_IP="$(curl https://api.ipify.org)"
 
-#update status-watchdog with specific fee and snark worker address, place in usr/local/bin 
+#update status-watchdog with specific fee and snark worker address, place in usr/local/bin
 mkdir -p $YOUR_LEDGER_ARCHIVE_DIRECTORY
 mkdir -p ~/keys
 
@@ -32,10 +34,11 @@ sed -i "s/YOUR_SW_ADDRESS/$YOUR_SW_ADDRESS/g" partial-configs/mina-env
 sed -i "s/YOUR_SW_FEE/$YOUR_SW_FEE/g" partial-configs/mina-env
 sed -i "s/YOUR_COINBASE_RECEIVER/$YOUR_COINBASE_RECEIVER/g" partial-configs/mina-env
 sed -i "s/YOUR_HOST_IP/$YOUR_HOST_IP/g" partial-configs/mina-env
+sed -i "s/YOUR_BP_ADDRESS/$YOUR_BP_ADDRESS/g" partial-configs/mina-env
 if $INSTALL_GCLOUD
 then
     sed -i "s^GCS_KEYS^$GCS_KEYS^g" partial-configs/mina-env
-    sed -i "s^YOUR_GCS_NETWORK_NAME^$YOUR_GCS_NETWORK_NAME^g" partial-configs/mina-env 
+    sed -i "s^YOUR_GCS_NETWORK_NAME^$YOUR_GCS_NETWORK_NAME^g" partial-configs/mina-env
     sed -i "s^GCS_BUCKET^$GCS_BUCKET^g" partial-configs/mina-env
 fi
 
