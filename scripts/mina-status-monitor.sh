@@ -36,6 +36,7 @@ function INITIALIZEVARS {
   readonly FDLIMIT=$(ulimit -n)
   MINA_STATUS=""
   STAT=""
+  KNOWNSTATUS=0
   CONNECTINGCOUNT=0
   OFFLINECOUNT=0
   CATCHUPCOUNT=0
@@ -182,10 +183,12 @@ function VALIDATEHEIGHTS {
 INITIALIZEVARS
 
 while :; do
+  KNOWNSTATUS=0
   MINA_STATUS="$(mina client status -json | grep -v --regexp="$GARBAGE" )"
   STAT="$(echo $MINA_STATUS | jq .sync_status)"
 
   if [[ "$STAT" == "\"Synced\"" ]]; then
+    KNOWNSTATUS=1
     HIGHESTBLOCK="$(echo $MINA_STATUS | jq .highest_block_length_received)"
     HIGHESTUNVALIDATEDBLOCK="$(echo $MINA_STATUS | jq .highest_unvalidated_block_length_received)"
     BLOCKCHAINLENGTH="$(echo $MINA_STATUS | jq .blockchain_length)"
@@ -204,6 +207,7 @@ while :; do
   fi
 
   if [[ "$STAT" == "\"Connecting\"" ]]; then
+    KNOWNSTATUS=1
     ((CONNECTINGCOUNT++))
     ((TOTALCONNECTINGCOUNT++))
   fi
@@ -214,6 +218,7 @@ while :; do
   fi
 
   if [[ "$STAT" == "\"Offline\"" ]]; then
+    KNOWNSTATUS=1
     ((OFFLINECOUNT++))
     ((TOTALOFFLINECOUNT++))
   fi
@@ -224,6 +229,7 @@ while :; do
   fi
 
   if [[ "$STAT" == "\"Catchup\"" ]]; then
+    KNOWNSTATUS=1
     ((CATCHUPCOUNT++))
     ((TOTALCATCHUPCOUNT++))
   fi
@@ -231,6 +237,22 @@ while :; do
     echo "Restarting mina - too long in Catchup state"
     systemctl --user restart mina
     CATCHUPCOUNT=0
+  fi
+
+  if [[ "$STAT" == "\"Bootstrap\"" ]]; then
+    #TODO should there be a limit here?
+    KNOWNSTATUS=1
+  fi
+
+  if [[ "$STAT" == "\"Listening\"" ]]; then
+    #TODO limit? what does it mean if hanging out in listening?
+    KNOWNSTATUS=1
+  fi
+
+  if [[ "$KNOWNSTATUS" -eq 0 ]]; then
+    echo "Returned Status is unkown or not handled." $STAT
+    echo "Restarting MINA because status unkown"
+    systemctl --user restart mina
   fi
 
   if [[ "$USESNARKSTOPPER" -eq 1 ]]; then
