@@ -7,6 +7,7 @@
 readonly MONITORCYCLE=300 #how many seconds between mina client status checks (e.g. 60s * 5min = 300)
 readonly CATCHUPWINDOW=12 #how many MONITORCYCLE intervals to wait for catchup before restart (12 * 5mins = 60 mins)
 readonly MAXUNVALIDATEDDELTA=3 #will count as out of compliance if more than this many blocks ahead or behind unvalidated count
+readonly STANDOFFAFTERRESTART=2 #how many MONITORSYCLCE intervals should be allowed for daemon to try to restart before issuing another restart
 readonly GARBAGE="Using password from environment variable CODA_PRIVKEY_PASS" #strip this out of the status
 
 # Monitoring docker containers via graphql instead of daemon locally
@@ -15,7 +16,7 @@ readonly USEDOCKER=0
 
 #Snark Stopper
 readonly USESNARKSTOPPER=1 #set to 1 to run snark stopper, 0 to turn it off (will stop snarking if not in sync, or producing a block soon)
-SNARKWORKERTURNEDOFF=0 #set to 1 to assume snark worker should always be turned on for first run, otherwise 0
+SNARKWORKERTURNEDOFF=1 #set to 1 to assume snark worker should always be turned on for first run, otherwise 0
 readonly STOPSNARKINGLESSTHAN=5 #threshold in minutes to stop snarking - if minutes until produce block < this value, will stop snark worker
 readonly FEE=1 #YOUR_SW_FEE ### *** SET YOUR SNARK WORKER FEE HERE *** ###
 readonly SW_ADDRESS=B62qkBqSkXgkirtU3n8HJ9YgwHh3vUD6kGJ5ZRkQYGNPeL5xYL2tL1L #YOUR_SW_ADDRESS ### *** SET YOUR SNARK WORKER ADDRESS HERE *** ###
@@ -43,6 +44,7 @@ function INITIALIZEVARS {
   readonly HOURS_PER_DAY=24
   MINA_STATUS=""
   STAT=""
+  DAEMONRESTARTCOUNTER=0
   KNOWNSTATUS=0
   CONNECTINGCOUNT=0
   OFFLINECOUNT=0
@@ -92,16 +94,17 @@ function CHECKCONFIG {
 
 #################### ADD DOCKER SUPPORT #######################
 function RESTARTMINADAEMON {
-  #if DOCKER .. .do something else ...
-  if [[ "$USEDOCKER" -eq 0 ]]; then
-    systemctl --user restart mina
-  else
-    docker restart mina
+  if (( DAEMONRESTARTCOUNTER % STANDOFFAFTERRESTART == 0 )); then
+    if [[ "$USEDOCKER" -eq 0 ]]; then
+      systemctl --user restart mina
+    else
+      docker restart mina
+    fi
+    ((DAEMONRESTARTCOUNTER++))
   fi
 }
 
 function RESTARTARCHIVESERVICE {
-  #if DOCKER .. .do something else ...
   if [[ "$USEDOCKER" -eq 0 ]]; then
     systemctl --user restart mina-archive.service
   else
@@ -225,7 +228,7 @@ function CHECKSIDECAR {
   fi
 }
 
-function CHECKSNARKWORKER {
+function MANAGESNARKER {
   if [[ "$STAT" == "\"Synced\"" ]]; then
     # Calculate whether block producer will run within the next X mins
     # If up for a block within 5 mins, stop snarking, resume on next pass
@@ -241,12 +244,31 @@ function CHECKSNARKWORKER {
         #TIMEBEFORENEXT="$(($NEXTPROP-$NOW))"
         #TIMEBEFORENEXTSEC="${TIMEBEFORENEXT:0:-3}"
         #TIMEBEFORENEXTMIN="$((${TIMEBEFORENEXTSEC} / ${SECONDS_PER_MINUTE}))"
+      else
+        echo "Next block production time unknown"
+        if [[ "$SNARKWORKERTURNEDOFF" -gt 0 ]]; then
+          echo "Starting the snark worker.."
+          STARTSNARKING
+          SNARKWORKERTURNEDOFF=0
+        fi
+        return 0
       fi
     else
-      #DOCKER IMPL
-      NEXTPROP=$(echo $NEXTPROP | jq tonumber)
-      NEXTPROP="${NEXTPROP::-3}"
+      if [[ $NEXTPROP != null ]]; then
+        #DOCKER IMPL
+        NEXTPROP=$(echo $NEXTPROP | jq tonumber)
+        NEXTPROP="${NEXTPROP::-3}"
+      else
+        echo "Next block production time unknown"
+        if [[ "$SNARKWORKERTURNEDOFF" -gt 0 ]]; then
+          echo "Starting the snark worker.."
+          STARTSNARKING
+          SNARKWORKERTURNEDOFF=0
+        fi
+        return 0
+      fi
     fi
+
     NOW="$(date +%s)"
     TIMEBEFORENEXT="$(($NEXTPROP - $NOW))"
     TIMEBEFORENEXTMIN="$(($TIMEBEFORENEXT / $SECONDS_PER_MINUTE))"
@@ -255,6 +277,7 @@ function CHECKSNARKWORKER {
     DAYS="$(($HOURS / $HOURS_PER_DAY))"
     HOURS="$(($HOURS % $HOURS_PER_DAY))"
     echo "Next block production: $DAYS days $HOURS hours $MINS minutes left"
+
     if [[ "$TIMEBEFORENEXTMIN" -lt "$STOPSNARKINGLESSTHAN" && "$SNARKWORKERTURNEDOFF" -eq 0 ]]; then
       echo "Stop snarking - producing a block soon"
       STOPSNARKING
@@ -265,8 +288,8 @@ function CHECKSNARKWORKER {
           SNARKWORKERTURNEDOFF=0
       fi
     fi
-  else
-    # stop snarking if not in sync!
+
+  else # stop snarking if not in sync
     if [[ "$SNARKWORKERTURNEDOFF" -eq 0 ]]; then
       echo "Stop snarking - node is not in sync"
       STOPSNARKING
@@ -386,8 +409,9 @@ while :; do
     echo "Restarting MINA because status unkown"
     RESTARTMINADAEMON
   else
+    DAEMONRESTARTCOUNTER=0
     if [[ "$USESNARKSTOPPER" -eq 1 ]]; then
-      CHECKSNARKWORKER
+      MANAGESNARKER
     fi
 
     if [[ "$USEARCHIVEMONITOR" -eq 1 ]]; then
@@ -403,7 +427,7 @@ while :; do
     CHECKFILEDESCRIPTORS
   fi
 
-  echo $(date) " Status:" $STAT, "Connecting Count, Total:" $CONNECTINGCOUNT $TOTALCONNECTINGCOUNT, "Offline Count, Total:" $OFFLINECOUNT $TOTALOFFLINECOUNT, "Archive Down Count:" $ARCHIVEDOWNCOUNT, "Node Stuck Below Tip:" $TOTALSTUCKCOUNT, "Total Catchup:" $TOTALCATCHUPCOUNT, "Total Height Mismatch:" $TOTALHEIGHTOFFCOUNT, "Total Mina Explorer Mismatch:" $TOTALVSMECOUNT, "Time Until Block:" $TIMEBEFORENEXTMIN
+  echo $(date) "Status:" $STAT, "Connecting Count, Total:" $CONNECTINGCOUNT $TOTALCONNECTINGCOUNT, "Offline Count, Total:" $OFFLINECOUNT $TOTALOFFLINECOUNT, "Archive Down Count:" $ARCHIVEDOWNCOUNT, "Node Stuck Below Tip:" $TOTALSTUCKCOUNT, "Total Catchup:" $TOTALCATCHUPCOUNT, "Total Height Mismatch:" $TOTALHEIGHTOFFCOUNT, "Total Mina Explorer Mismatch:" $TOTALVSMECOUNT, "Time Until Block:" $TIMEBEFORENEXTMIN
 
   sleep $MONITORCYCLE
   #check if sleep exited with break (ctrl+c) to exit the loop
