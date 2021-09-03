@@ -234,9 +234,9 @@ function CHECKSNARKWORKER {
       PRODUCER="$(echo $MINA_STATUS | jq .next_block_production.timing[0])"
       if [[ "$PRODUCER" == "\"Produce\"" ]]; then
         NEXTPROP="$(echo $MINA_STATUS | jq .next_block_production.timing[1].time)"
-        #NEXTPROP="${NEXTPROP::-3}"
-        #NEXTPROP="${NEXTPROP:1}"
-        #NEXTPROP="${NEXTPROP:0:-1}"
+        NEXTPROP="${NEXTPROP::-3}"
+        NEXTPROP="${NEXTPROP:1}"
+        NEXTPROP="${NEXTPROP:0:-1}"
         #NOW="$(date +%s%N | cut -b1-13)"
         #TIMEBEFORENEXT="$(($NEXTPROP-$NOW))"
         #TIMEBEFORENEXTSEC="${TIMEBEFORENEXT:0:-3}"
@@ -245,8 +245,8 @@ function CHECKSNARKWORKER {
     else
       #DOCKER IMPL
       NEXTPROP=$(echo $NEXTPROP | jq tonumber)
+      NEXTPROP="${NEXTPROP::-3}"
     fi
-    NEXTPROP="${NEXTPROP::-3}"
     NOW="$(date +%s)"
     TIMEBEFORENEXT="$(($NEXTPROP - $NOW))"
     TIMEBEFORENEXTMIN="$(($TIMEBEFORENEXT / $SECONDS_PER_MINUTE))"
@@ -403,7 +403,7 @@ while :; do
     CHECKFILEDESCRIPTORS
   fi
 
-  echo date " Status:" $STAT, "Connecting Count, Total:" $CONNECTINGCOUNT $TOTALCONNECTINGCOUNT, "Offline Count, Total:" $OFFLINECOUNT $TOTALOFFLINECOUNT, "Archive Down Count:" $ARCHIVEDOWNCOUNT, "Node Stuck Below Tip:" $TOTALSTUCKCOUNT, "Total Catchup:" $TOTALCATCHUPCOUNT, "Total Height Mismatch:" $TOTALHEIGHTOFFCOUNT, "Total Mina Explorer Mismatch:" $TOTALVSMECOUNT, "Time Until Block:" $TIMEBEFORENEXTMIN
+  echo $(date) " Status:" $STAT, "Connecting Count, Total:" $CONNECTINGCOUNT $TOTALCONNECTINGCOUNT, "Offline Count, Total:" $OFFLINECOUNT $TOTALOFFLINECOUNT, "Archive Down Count:" $ARCHIVEDOWNCOUNT, "Node Stuck Below Tip:" $TOTALSTUCKCOUNT, "Total Catchup:" $TOTALCATCHUPCOUNT, "Total Height Mismatch:" $TOTALHEIGHTOFFCOUNT, "Total Mina Explorer Mismatch:" $TOTALVSMECOUNT, "Time Until Block:" $TIMEBEFORENEXTMIN
 
   sleep $MONITORCYCLE
   #check if sleep exited with break (ctrl+c) to exit the loop
