@@ -94,12 +94,15 @@ function CHECKCONFIG {
 #################### ADD DOCKER SUPPORT #######################
 function RESTARTMINADAEMON {
   if (( DAEMONRESTARTCOUNTER % STANDOFFAFTERRESTART == 0 )); then
+    echo "Restarting MINA"
     if [[ "$USEDOCKER" -eq 0 ]]; then
       systemctl --user restart mina
     else
       docker restart mina
     fi
     ((DAEMONRESTARTCOUNTER++))
+  else
+    echo "Not restarting MINA Daemon yet because it was recently restarted"
   fi
 }
 
@@ -405,7 +408,6 @@ while :; do
 
   if [[ "$KNOWNSTATUS" -eq 0 ]]; then
     echo "Returned Status is unkown or not handled." $STAT
-    echo "Restarting MINA because status unkown"
     RESTARTMINADAEMON
   else
     DAEMONRESTARTCOUNTER=0
