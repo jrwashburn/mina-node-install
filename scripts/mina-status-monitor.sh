@@ -1,5 +1,4 @@
 # Not sure why this is still in shell...but...we're here now.
-
 #Credit to _thanos for the original snarkstopper - https://forums.minaprotocol.com/t/guide-script-automagically-stops-snark-work-prior-of-getting-a-block-proposal/299
 #Credit to @vanphandinh for docker port, re-integrating some of those changes here from https://github.com/vanphandinh/mina-status-monitor/blob/master/mina-status-monitor.sh
 
@@ -18,24 +17,24 @@ readonly USEDOCKER=0
 readonly USESNARKSTOPPER=1 #set to 1 to run snark stopper, 0 to turn it off (will stop snarking if not in sync, or producing a block soon)
 SNARKWORKERTURNEDOFF=1 #set to 1 to assume snark worker should always be turned on for first run, otherwise 0
 readonly STOPSNARKINGLESSTHAN=5 #threshold in minutes to stop snarking - if minutes until produce block < this value, will stop snark worker
-readonly FEE=1 #YOUR_SW_FEE ### *** SET YOUR SNARK WORKER FEE HERE *** ###
-readonly SW_ADDRESS=B62qkBqSkXgkirtU3n8HJ9YgwHh3vUD6kGJ5ZRkQYGNPeL5xYL2tL1L #YOUR_SW_ADDRESS ### *** SET YOUR SNARK WORKER ADDRESS HERE *** ###
+readonly FEE=YOUR_SW_FEE ### *** SET YOUR SNARK WORKER FEE HERE *** ###
+readonly SW_ADDRESS=YOUR_SW_ADDRESS ### *** SET YOUR SNARK WORKER ADDRESS HERE *** ###
 
 #Sidecar Monitoring
 readonly USESIDECARMONITOR=1 #set to 1 to monitor sidecar service, 0 ignores sidecar monitoring
 
 #Archive Monitoring - Not currently supported with Docker - set to 0 if USEDOCKER=1
-readonly USEARCHIVEMONITOR=1 #set to 1 to monitor archive service, 0 ignores archive monitoring
+readonly USEARCHIVEMONITOR=0 #set to 1 to monitor archive service, 0 ignores archive monitoring
 
 #Compare to Mina Explorer Height
 readonly USEMINAEXPLORERMONITOR=1 #set to 1 to compare synced height vs. Mina Explorer reported height, 0 does not check MinaExplorer
 readonly MINAEXPLORERMAXDELTA=3 #number of blocks to tolerate in synced blockheight vs. Mina Explorers reported height
 readonly MINAEXPLORERTOLERANCEWINDOW=5 #how many intervals to wait to restart with coninual out of sync vs. mina explorer
-readonly MINAEXPLORERURL=https://devnet.api.minaexplorer.com # https://api.minaexplorer.com #url to get status from mina explorer -- devnet: https://devnet.api.minaexplorer.com
+readonly MINAEXPLORERURL=https://api.minaexplorer.com #url to get status from mina explorer -- devnet: https://devnet.api.minaexplorer.com
 
 #File Descriptor Monitoring - Not currently supported with Docker - set to 0 if USEDOCKER=1
 #if turned on, this dumps lsof to /tmp and does not clean up after itself - keep an eye on that!
-readonly USEFILEDESCRIPTORSMONITOR=1 #set to 1 to turn on file descriptor logging, 0 to turn it on
+readonly USEFILEDESCRIPTORSMONITOR=0 #set to 1 to turn on file descriptor logging, 0 to turn it on
 
 function INITIALIZEVARS {
   readonly SECONDS_PER_MINUTE=60
