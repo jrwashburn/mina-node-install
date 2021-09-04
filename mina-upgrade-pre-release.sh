@@ -1,6 +1,6 @@
 #!/bin/bash -x
-MINA_VERSION=mina-devnet=1.2.0beta3-0c70f84
-ARCHIVE_VERSION=mina-archive-devnet=1.2.0beta3-0c70f84
+MINA_VERSION=mina-devnet=1.2.0beta4-53a65a0-mainnet
+ARCHIVE_VERSION=mina-archive-devnet=1.2.0beta4-53a65a0-mainnet
 #SIDECAR_VERSION=mina-bp-stats-sidecar=1.2.0beta2-c856692
 
 THE_SEEDS_URL=https://storage.googleapis.com/seed-lists/devnet_seeds.txt
@@ -26,5 +26,5 @@ systemctl --user daemon-reload
 systemctl --user start mina-archive.service
 systemctl --user start mina.service
 systemctl --user start mina-staking-ledgers-archive.timer
-#systemctl --user start mina-sidecar.service
+systemctl --user start mina-sidecar.service
 systemctl --user start mina-status-monitor.service
