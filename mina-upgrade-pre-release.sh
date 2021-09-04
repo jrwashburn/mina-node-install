@@ -1,7 +1,7 @@
 #!/bin/bash -x
-MINA_VERSION=mina-devnet=1.2.0beta4-53a65a0-mainnet
-ARCHIVE_VERSION=mina-archive-devnet=1.2.0beta4-53a65a0-mainnet
-#SIDECAR_VERSION=mina-bp-stats-sidecar=1.2.0beta2-c856692
+MINA_VERSION=mina-devnet=1.2.0beta4-53a65a0-devnet
+ARCHIVE_VERSION=mina-archive-devnet=1.2.0beta4-53a65a0-devnet
+SIDECAR_VERSION=mina-bp-stats-sidecar=1.2.0beta2-c856692
 
 THE_SEEDS_URL=https://storage.googleapis.com/seed-lists/devnet_seeds.txt
 
@@ -18,7 +18,7 @@ sudo apt-get -y update
 
 sudo apt-get install -y $MINA_VERSION
 sudo apt-get install -y $ARCHIVE_VERSION
-#sudo apt-get install -y $SIDECAR_VERSION
+sudo apt-get install -y $SIDECAR_VERSION
 
 sed -i "s^https://storage.googleapis.com/mina-seed-lists/mainnet_seeds.txt^$THE_SEEDS_URL^g" ~/.mina-env
 
