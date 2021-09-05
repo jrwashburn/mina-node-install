@@ -191,7 +191,7 @@ function GETSIDECARSTATUS {
 function GETARCHIVESTATUS {
   #TODO this should be improved to monitor something useful....TBD what that might be
   if [[ "$USEDOCKER" -eq 0 ]]; then
-    ARCHIVERUNNING="$(ps -A | grep coda-archive | wc -l)"
+    ARCHIVERUNNING="$(ps -A | grep mina-archive | wc -l)"
   else
     echo "NOT SETUP TO CHECK ARCHIVE ON DOCKER"
   fi
