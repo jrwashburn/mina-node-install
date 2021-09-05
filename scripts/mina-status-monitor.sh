@@ -43,6 +43,7 @@ function INITIALIZEVARS {
   readonly HOURS_PER_DAY=24
   MINA_STATUS=""
   STAT=""
+  NEXTBLOCK=""
   DAEMONRESTARTCOUNTER=0
   KNOWNSTATUS=0
   CONNECTINGCOUNT=0
@@ -278,7 +279,7 @@ function MANAGESNARKER {
     HOURS="$(($TIMEBEFORENEXTMIN / $MINUTES_PER_HOUR))"
     DAYS="$(($HOURS / $HOURS_PER_DAY))"
     HOURS="$(($HOURS % $HOURS_PER_DAY))"
-    echo "Next block production: $DAYS days $HOURS hours $MINS minutes left"
+    NEXTBLOCK="Next block production: $DAYS days $HOURS hours $MINS minutes"
 
     if [[ "$TIMEBEFORENEXTMIN" -lt "$STOPSNARKINGLESSTHAN" && "$SNARKWORKERTURNEDOFF" -eq 0 ]]; then
       echo "Stop snarking - producing a block soon"
@@ -369,7 +370,7 @@ while :; do
     ((TOTALCONNECTINGCOUNT++))
   fi
   if [[ "$CONNECTINGCOUNT" -gt 1 ]]; then
-    echo "Restarting mina - too long in Connecting state (~10 mins)"
+    echo "Restarting mina - too long in Connecting state (2 cycles)"
     RESTARTMINADAEMON
     CONNECTINGCOUNT=0
   fi
@@ -379,8 +380,8 @@ while :; do
     ((OFFLINECOUNT++))
     ((TOTALOFFLINECOUNT++))
   fi
-  if [[ "$OFFLINECOUNT" -gt 3 ]]; then
-    echo "Restarting mina - too long in Offline state (~20 mins)"
+  if [[ "$OFFLINECOUNT" -gt 2 ]]; then
+    echo "Restarting mina - too long in Offline state (3 cycles)"
     RESTARTMINADAEMON
     OFFLINECOUNT=0
   fi
@@ -428,7 +429,7 @@ while :; do
     CHECKFILEDESCRIPTORS
   fi
 
-  echo $(date) "Status:" $STAT, "Connecting Count, Total:" $CONNECTINGCOUNT $TOTALCONNECTINGCOUNT, "Offline Count, Total:" $OFFLINECOUNT $TOTALOFFLINECOUNT, "Archive Down Count:" $ARCHIVEDOWNCOUNT, "Node Stuck Below Tip:" $TOTALSTUCKCOUNT, "Total Catchup:" $TOTALCATCHUPCOUNT, "Total Height Mismatch:" $TOTALHEIGHTOFFCOUNT, "Total Mina Explorer Mismatch:" $TOTALVSMECOUNT, "Time Until Block:" $TIMEBEFORENEXTMIN
+  echo $(date) "Status:" $STAT, "Connecting Count, Total:" $CONNECTINGCOUNT $TOTALCONNECTINGCOUNT, "Offline Count, Total:" $OFFLINECOUNT $TOTALOFFLINECOUNT, "Archive Down Count:" $ARCHIVEDOWNCOUNT, "Node Stuck Below Tip:" $TOTALSTUCKCOUNT, "Total Catchup:" $TOTALCATCHUPCOUNT, "Total Height Mismatch:" $TOTALHEIGHTOFFCOUNT, "Total Mina Explorer Mismatch:" $TOTALVSMECOUNT, "Time Until Block:" $TIMEBEFORENEXTMIN, $NEXTBLOCK
 
   sleep $MONITORCYCLE
   #check if sleep exited with break (ctrl+c) to exit the loop
