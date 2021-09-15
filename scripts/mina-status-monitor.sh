@@ -289,7 +289,7 @@ function MANAGESNARKER {
       STOPSNARKING
       ((SNARKWORKERTURNEDOFF++))
     else
-      if [[ "$SNARKWORKERTURNEDOFF" -gt 0 ]]; then
+      if [[ "$TIMEBEFORENEXTMIN" -gt "$STOPSNARKINGLESSTHAN" && "$SNARKWORKERTURNEDOFF" -gt 0 ]]; then
           STARTSNARKING
           SNARKWORKERTURNEDOFF=0
       fi
