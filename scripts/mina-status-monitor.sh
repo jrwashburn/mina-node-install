@@ -436,8 +436,7 @@ while :; do
     CHECKFILEDESCRIPTORS
   fi
 
-  echo $(date) "Status:" $STAT, "Connecting Count, Total:" $CONNECTINGCOUNT $TOTALCONNECTINGCOUNT, "Offline Count, Total:" $OFFLINECOUNT $TOTALOFFLINECOUNT, "Archive Down Count:" $ARCHIVEDOWNCOUNT, "Node Stuck Below Tip:" $TOTALSTUCKCOUNT, "Total Catchup:" $TOTALCATCHUPCOUNT, "Total Height Mismatch:" $TOTALHEIGHTOFFCOUNT, "Total Mina Explorer Mismatch:" $TOTALVSMECOUNT, "Time Until Block:" $TIMEBEFORENEXTMIN, $NEXTBLOCK, "Current Status Failures:" $STATUSFAILURES, "Uptime Hours:" $(($UPTIMESECS / $SECONDS_PER_HOUR))
-
+  echo $(date) "Status:" $STAT, "Connecting Count, Total:" $CONNECTINGCOUNT $TOTALCONNECTINGCOUNT, "Offline Count, Total:" $OFFLINECOUNT $TOTALOFFLINECOUNT, "Archive Down Count:" $ARCHIVEDOWNCOUNT, "Node Stuck Below Tip:" $TOTALSTUCKCOUNT, "Total Catchup:" $TOTALCATCHUPCOUNT, "Total Height Mismatch:" $TOTALHEIGHTOFFCOUNT, "Total Mina Explorer Mismatch:" $TOTALVSMECOUNT, "Time Until Block:" $TIMEBEFORENEXTMIN, $NEXTBLOCK, "Current Status Failures:" $STATUSFAILURES, "Uptime Hours:" $(($UPTIMESECS / $SECONDS_PER_HOUR)), "Uptime Total Min:" $(($UPTIMESECS / $SECONDS_PER_MINUTE))
   sleep $MONITORCYCLE
   #check if sleep exited with break (ctrl+c) to exit the loop
   test $? -gt 128 && break;
