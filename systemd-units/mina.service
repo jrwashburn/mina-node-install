@@ -11,7 +11,6 @@ Restart=always
 RestartSec=15
 ExecStart=/usr/local/bin/mina daemon \
   --generate-genesis-proof true \
-  --peer-list-url $SEEDS_URL \
   --block-producer-key $WALLET_FILE \
   $EXTRA_FLAGS
 ExecStop=/usr/local/bin/mina client stop-daemon
