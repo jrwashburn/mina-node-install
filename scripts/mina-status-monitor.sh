@@ -4,7 +4,7 @@
 
 #General Parameters
 readonly MONITORCYCLE=300 #how many seconds between mina client status checks (e.g. 60s * 5min = 300)
-readonly CATCHUPWINDOW=12 #how many MONITORCYCLE intervals to wait for catchup before restart (12 * 5mins = 60 mins)
+readonly CATCHUPWINDOW=18 #how many MONITORCYCLE intervals to wait for catchup before restart (12 * 5mins = 60 mins)
 readonly MAXUNVALIDATEDDELTA=3 #will count as out of compliance if more than this many blocks ahead or behind unvalidated count
 readonly MAXSTATUSFAILURE=2 #will allow upt to this number of cycles to of status failure before force restart
 readonly STANDOFFAFTERRESTART=2 #how many MONITORSYCLCE intervals should be allowed for daemon to try to restart before issuing another restart
