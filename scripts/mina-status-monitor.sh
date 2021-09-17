@@ -4,8 +4,9 @@
 
 #General Parameters
 readonly MONITORCYCLE=300 #how many seconds between mina client status checks (e.g. 60s * 5min = 300)
-readonly CATCHUPWINDOW=12 #how many MONITORCYCLE intervals to wait for catchup before restart (12 * 5mins = 60 mins)
+readonly CATCHUPWINDOW=18 #how many MONITORCYCLE intervals to wait for catchup before restart (12 * 5mins = 60 mins)
 readonly MAXUNVALIDATEDDELTA=3 #will count as out of compliance if more than this many blocks ahead or behind unvalidated count
+readonly MAXSTATUSFAILURE=2 #will allow upt to this number of cycles to of status failure before force restart
 readonly STANDOFFAFTERRESTART=2 #how many MONITORSYCLCE intervals should be allowed for daemon to try to restart before issuing another restart
 readonly GARBAGE="Using password from environment variable CODA_PRIVKEY_PASS" #strip this out of the status
 
@@ -24,10 +25,10 @@ readonly SW_ADDRESS=YOUR_SW_ADDRESS ### *** SET YOUR SNARK WORKER ADDRESS HERE *
 readonly USESIDECARMONITOR=1 #set to 1 to monitor sidecar service, 0 ignores sidecar monitoring
 
 #Archive Monitoring - Not currently supported with Docker - set to 0 if USEDOCKER=1
-readonly USEARCHIVEMONITOR=0 #set to 1 to monitor archive service, 0 ignores archive monitoring
+readonly USEARCHIVEMONITOR=1 #set to 1 to monitor archive service, 0 ignores archive monitoring
 
 #Compare to Mina Explorer Height
-readonly USEMINAEXPLORERMONITOR=1 #set to 1 to compare synced height vs. Mina Explorer reported height, 0 does not check MinaExplorer
+readonly USEMINAEXPLORERMONITOR=0 #set to 1 to compare synced height vs. Mina Explorer reported height, 0 does not check MinaExplorer
 readonly MINAEXPLORERMAXDELTA=3 #number of blocks to tolerate in synced blockheight vs. Mina Explorers reported height
 readonly MINAEXPLORERTOLERANCEWINDOW=5 #how many intervals to wait to restart with coninual out of sync vs. mina explorer
 readonly MINAEXPLORERURL=https://api.minaexplorer.com #url to get status from mina explorer -- devnet: https://devnet.api.minaexplorer.com
@@ -44,6 +45,7 @@ function INITIALIZEVARS {
   MINA_STATUS=""
   STAT=""
   NEXTBLOCK=""
+  STATUSFAILURES=0
   DAEMONRESTARTCOUNTER=0
   KNOWNSTATUS=0
   CONNECTINGCOUNT=0
@@ -152,6 +154,7 @@ function GETDAEMONSTATUS {
         BLOCKCHAINLENGTH="$(echo $MINA_STATUS | jq .blockchain_length)"
         HIGHESTBLOCK="$(echo $MINA_STATUS | jq .highest_block_length_received)"
         HIGHESTUNVALIDATEDBLOCK="$(echo $MINA_STATUS | jq .highest_unvalidated_block_length_received)"
+        UPTIMESECS="$(echo $MINA_STATUS | jq .uptime_secs)"
       fi
     fi
   else
@@ -286,7 +289,7 @@ function MANAGESNARKER {
       STOPSNARKING
       ((SNARKWORKERTURNEDOFF++))
     else
-      if [[ "$SNARKWORKERTURNEDOFF" -gt 0 ]]; then
+      if [[ "$TIMEBEFORENEXTMIN" -gt "$STOPSNARKINGLESSTHAN" && "$SNARKWORKERTURNEDOFF" -gt 0 ]]; then
           STARTSNARKING
           SNARKWORKERTURNEDOFF=0
       fi
@@ -408,9 +411,13 @@ while :; do
   fi
 
   if [[ "$KNOWNSTATUS" -eq 0 ]]; then
-    echo "Returned Status is unkown or not handled." $STAT
-    RESTARTMINADAEMON
+    echo "Returned Status is unkown or not handled:" $STAT
+    ((STATUSFAILURES++))
+    if [[ STATUSFAILURES -eq "$MAXSTATUSFAILURE" ]]; then
+      RESTARTMINADAEMON
+    fi
   else
+    STATUSFAILURES=0
     DAEMONRESTARTCOUNTER=0
     if [[ "$USESNARKSTOPPER" -eq 1 ]]; then
       MANAGESNARKER
@@ -429,8 +436,7 @@ while :; do
     CHECKFILEDESCRIPTORS
   fi
 
-  echo $(date) "Status:" $STAT, "Connecting Count, Total:" $CONNECTINGCOUNT $TOTALCONNECTINGCOUNT, "Offline Count, Total:" $OFFLINECOUNT $TOTALOFFLINECOUNT, "Archive Down Count:" $ARCHIVEDOWNCOUNT, "Node Stuck Below Tip:" $TOTALSTUCKCOUNT, "Total Catchup:" $TOTALCATCHUPCOUNT, "Total Height Mismatch:" $TOTALHEIGHTOFFCOUNT, "Total Mina Explorer Mismatch:" $TOTALVSMECOUNT, "Time Until Block:" $TIMEBEFORENEXTMIN, $NEXTBLOCK
-
+  echo $(date) "Status:" $STAT, "Connecting Count, Total:" $CONNECTINGCOUNT $TOTALCONNECTINGCOUNT, "Offline Count, Total:" $OFFLINECOUNT $TOTALOFFLINECOUNT, "Archive Down Count:" $ARCHIVEDOWNCOUNT, "Node Stuck Below Tip:" $TOTALSTUCKCOUNT, "Total Catchup:" $TOTALCATCHUPCOUNT, "Total Height Mismatch:" $TOTALHEIGHTOFFCOUNT, "Total Mina Explorer Mismatch:" $TOTALVSMECOUNT, "Time Until Block:" $TIMEBEFORENEXTMIN, $NEXTBLOCK, "Current Status Failures:" $STATUSFAILURES, "Uptime Hours:" $(($UPTIMESECS / $SECONDS_PER_HOUR)), "Uptime Total Min:" $(($UPTIMESECS / $SECONDS_PER_MINUTE))
   sleep $MONITORCYCLE
   #check if sleep exited with break (ctrl+c) to exit the loop
   test $? -gt 128 && break;
