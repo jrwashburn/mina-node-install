@@ -98,7 +98,7 @@ function CHECKCONFIG {
 #################### ADD DOCKER SUPPORT #######################
 function RESTARTMINADAEMON {
   ((DAEMONRESTARTCOUNTER++))
-  if (( DAEMONRESTARTCOUNTER % STANDOFFAFTERRESTART == 0 )); then
+  if [[ "$DAEMONRESTARTCOUNTER" -eq "$STANDOFFAFTERRESTART" ]]; then
     echo "Restarting MINA"
     if [[ "$USEDOCKER" -eq 0 ]]; then
       systemctl --user restart mina
@@ -106,7 +106,7 @@ function RESTARTMINADAEMON {
       docker restart mina
     fi
   else
-    echo "Not restarting MINA Daemon yet because it was recently restarted"
+    echo "Not restarting MINA Daemon yet because STANDOFFAFTERRESTART not met yet"
   fi
 }
 
