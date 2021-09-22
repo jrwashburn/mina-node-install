@@ -415,9 +415,7 @@ while :; do
   if [[ "$KNOWNSTATUS" -eq 0 ]]; then
     echo "Returned Status is unkown or not handled:" $STAT
     ((STATUSFAILURES++))
-    if [[ STATUSFAILURES -eq "$MAXSTATUSFAILURE" ]]; then
-      RESTARTMINADAEMON
-    fi
+    RESTARTMINADAEMON
   else
     STATUSFAILURES=0
     DAEMONRESTARTCOUNTER=0
