@@ -106,6 +106,7 @@ function RESTARTMINADAEMON {
       echo "Restarting MINA using docker restart"
       docker restart mina
     fi
+    DAEMONRESTARTCOUNTER=0
   else
     echo "Not restarting MINA Daemon yet because STANDOFFAFTERRESTART not met yet. counter, standoff:", $DAEMONRESTARTCOUNTER, $STANDOFFAFTERRESTART
   fi
