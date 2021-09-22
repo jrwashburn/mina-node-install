@@ -99,14 +99,15 @@ function CHECKCONFIG {
 function RESTARTMINADAEMON {
   ((DAEMONRESTARTCOUNTER++))
   if [[ "$DAEMONRESTARTCOUNTER" -eq "$STANDOFFAFTERRESTART" ]]; then
-    echo "Restarting MINA"
     if [[ "$USEDOCKER" -eq 0 ]]; then
+      echo "Restarting MINA using systemd"
       systemctl --user restart mina
     else
+      echo "Restarting MINA using docker restart"
       docker restart mina
     fi
   else
-    echo "Not restarting MINA Daemon yet because STANDOFFAFTERRESTART not met yet"
+    echo "Not restarting MINA Daemon yet because STANDOFFAFTERRESTART not met yet. counter, standoff:", $DAEMONRESTARTCOUNTER, $STANDOFFAFTERRESTART
   fi
 }
 
