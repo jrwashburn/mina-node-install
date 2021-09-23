@@ -10,9 +10,9 @@ YOUR_LEDGER_ARCHIVE_DIRECTORY=/home/minar/ledger-archives
 THE_SEEDS_URL=https://storage.googleapis.com/mina-seed-lists/mainnet_seeds.txt
 YOUR_WALLET_FILE=~/keys/my-wallet
 YOUR_COINBASE_RECEIVER=B62qoigHEtJCoZ5ekbGHWyr9hYfc6fkZ2A41h9vvVZuvty9amzEz3yB
-MINA_VERSION=mina-mainnet=1.1.7-d5ff5aa
-ARCHIVE_VERSION=mina-archive=1.1.7-d5ff5aa
-SIDECAR_VERSION=mina-bp-stats-sidecar=1.1.7-d5ff5aa
+MINA_VERSION=mina-mainnet=1.1.8-b10c0e3
+ARCHIVE_VERSION=mina-archive=1.1.8-b10c0e3
+SIDECAR_VERSION=mina-bp-stats-sidecar=1.1.8-b10c0e3
 INSTALL_GCLOUD=true
 GCS_KEYS=~/keys/my-gcs.json
 YOUR_GCS_NETWORK_NAME=mainnet
