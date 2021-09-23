@@ -6,7 +6,7 @@
 readonly MONITORCYCLE=300 #how many seconds between mina client status checks (e.g. 60s * 5min = 300)
 readonly CATCHUPWINDOW=18 #how many MONITORCYCLE intervals to wait for catchup before restart (12 * 5mins = 60 mins)
 readonly MAXUNVALIDATEDDELTA=3 #will count as out of compliance if more than this many blocks ahead or behind unvalidated count
-readonly MAXSTATUSFAILURE=2 #will allow upt to this number of cycles to of status failure before force restart
+readonly MAXSTATUSFAILURES=5 #will allow upt to this number of cycles of status failure before force restart
 readonly STANDOFFAFTERRESTART=2 #how many MONITORSYCLCE intervals should be allowed for daemon to try to restart before issuing another restart
 readonly GARBAGE="Using password from environment variable CODA_PRIVKEY_PASS" #strip this out of the status
 
@@ -47,6 +47,7 @@ function INITIALIZEVARS {
   NEXTBLOCK=""
   UPTIMESECS=0
   STATUSFAILURES=0
+  TOTALSTATUSFAILURES=0
   DAEMONRESTARTCOUNTER=0
   KNOWNSTATUS=0
   CONNECTINGCOUNT=0
@@ -98,7 +99,8 @@ function CHECKCONFIG {
 #################### ADD DOCKER SUPPORT #######################
 function RESTARTMINADAEMON {
   ((DAEMONRESTARTCOUNTER++))
-  if [[ "$DAEMONRESTARTCOUNTER" -eq "$STANDOFFAFTERRESTART" ]]; then
+  if [[ "$DAEMONRESTARTCOUNTER" -eq "$STANDOFFAFTERRESTART" || "$TOTALSTATUSFAILURES" -gt "$MAXSTATUSFAILURES" ]]; then
+    echo "Triggering restart: restart counter $DAEMONRESTARTCOUNTER, total status failures $TOTALSTATUSFAILURES"
     if [[ "$USEDOCKER" -eq 0 ]]; then
       echo "Restarting MINA using systemd"
       systemctl --user restart mina
@@ -107,6 +109,7 @@ function RESTARTMINADAEMON {
       docker restart mina
     fi
     DAEMONRESTARTCOUNTER=0
+    TOTALSTATUSFAILURES=0
   else
     echo "Not restarting MINA Daemon yet because STANDOFFAFTERRESTART not met yet. counter, standoff:", $DAEMONRESTARTCOUNTER, $STANDOFFAFTERRESTART
   fi
@@ -416,6 +419,7 @@ while :; do
   if [[ "$KNOWNSTATUS" -eq 0 ]]; then
     echo "Returned Status is unkown or not handled:" $STAT
     ((STATUSFAILURES++))
+    ((TOTALSTATUSFAILURES++))
     RESTARTMINADAEMON
   else
     STATUSFAILURES=0
@@ -437,7 +441,7 @@ while :; do
     CHECKFILEDESCRIPTORS
   fi
 
-  echo $(date) "Status:" $STAT, "Connecting Count, Total:" $CONNECTINGCOUNT $TOTALCONNECTINGCOUNT, "Offline Count, Total:" $OFFLINECOUNT $TOTALOFFLINECOUNT, "Archive Down Count:" $ARCHIVEDOWNCOUNT, "Node Stuck Below Tip:" $TOTALSTUCKCOUNT, "Total Catchup:" $TOTALCATCHUPCOUNT, "Total Height Mismatch:" $TOTALHEIGHTOFFCOUNT, "Total Mina Explorer Mismatch:" $TOTALVSMECOUNT, "Time Until Block:" $TIMEBEFORENEXTMIN, $NEXTBLOCK, "Current Status Failures:" $STATUSFAILURES, "Uptime Hours:" $(($UPTIMESECS / $SECONDS_PER_HOUR)), "Uptime Total Min:" $(($UPTIMESECS / $SECONDS_PER_MINUTE))
+  echo $(date) "Status:" $STAT, "Connecting Count, Total:" $CONNECTINGCOUNT $TOTALCONNECTINGCOUNT, "Offline Count, Total:" $OFFLINECOUNT $TOTALOFFLINECOUNT, "Archive Down Count:" $ARCHIVEDOWNCOUNT, "Node Stuck Below Tip:" $TOTALSTUCKCOUNT, "Total Catchup:" $TOTALCATCHUPCOUNT, "Total Height Mismatch:" $TOTALHEIGHTOFFCOUNT, "Total Mina Explorer Mismatch:" $TOTALVSMECOUNT, "Time Until Block:" $TIMEBEFORENEXTMIN, $NEXTBLOCK, "Current & Total Status Failures:" $STATUSFAILURES, $TOTALSTATUSFAILURES, "Uptime Hours:" $(($UPTIMESECS / $SECONDS_PER_HOUR)), "Uptime Total Min:" $(($UPTIMESECS / $SECONDS_PER_MINUTE))
   sleep $MONITORCYCLE
   #check if sleep exited with break (ctrl+c) to exit the loop
   test $? -gt 128 && break;
