@@ -411,9 +411,9 @@ while :; do
   if [[ "$STAT" == "\"Bootstrap\"" ]]; then
     KNOWNSTATUS=1
     ((BOOTSTRAPCOUNT++))
-    if [[ "$BOOTSTRAPCOUNT" -eq "$BOOTSTRAPLIMIT" ]]
+    if [[ "$BOOTSTRAPCOUNT" -eq "$BOOTSTRAPLIMIT" ]]; then
       RESTARTMINADAEMON
-    elif [[ "$BOOTSTRAPCOUNT" -gt "$BOOTSTRAPLIMIT" ]]
+    elif [[ "$BOOTSTRAPCOUNT" -gt "$BOOTSTRAPLIMIT" ]]; then
       RESTARTMINADAEMON
     fi
   else
