@@ -323,6 +323,7 @@ function CHECKMINAEXPLORER {
   if [[ "$VSMECOUNT" -gt "$MINAEXPLORERTOLERANCEWINDOW" ]]; then
     echo "Restarting mina - block heigh varied from ME too much / too long:", $DELTAHEIGHT, $BLOCKCHAINLENGTH, $HIGHESTBLOCK, $HIGHESTUNVALIDATEDBLOCK, $MINAEXPLORERBLOCKCHAINLENGTH, $DELTAME, $VSMECOUNT
     ((TOTALVSMECOUNT++))
+    ((DAEMONRESTARTCOUNTER++))
     RESTARTMINADAEMON
   fi
 }
@@ -340,6 +341,7 @@ function VALIDATEHEIGHTS {
   if [[ "$DELTAVALIDATED" -gt 5 ]]; then
     echo "Node stuck validated block height delta more than 5 blocks. Difference from Max obvserved and max observied unvalidated:", $DELTAVALIDATED
     ((TOTALSTUCKCOUNT++))
+    ((DAEMONRESTARTCOUNTER++))
     SYNCCOUNT=0
     RESTARTMINADAEMON
   fi
@@ -347,6 +349,7 @@ function VALIDATEHEIGHTS {
   if [[ "$HEIGHTOFFCOUNT" -gt 2 ]]; then
     echo "Restarting mina - Block Chain Length differs from Highest Observed Block by 3 or more", $DELTAHEIGHT, $BLOCKCHAINLENGTH, $HIGHESTBLOCK, $HIGHESTUNVALIDATEDBLOCK, $MINAEXPLORERBLOCKCHAINLENGTH, $DELTAME
     ((TOTALHEIGHTOFFCOUNT++))
+    ((DAEMONRESTARTCOUNTER++))
     HEIGHTOFFCOUNT=0
     RESTARTMINADAEMON
   fi
