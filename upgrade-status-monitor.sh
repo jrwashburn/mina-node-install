@@ -10,5 +10,6 @@ sed -i "s/SNARKWORKERTURNEDOFF=1/SNARKWORKERTURNEDOFF=0/g" scripts/mina-status-m
 
 sudo cp scripts/mina-status-monitor.sh /usr/local/bin/mina-status-monitor.sh
 systemctl --user stop mina-status-monitor.service
+mina client set-snark-worker
 sleep 5s
 systemctl --user start mina-status-monitor.service
