@@ -8,7 +8,7 @@ readonly CATCHUPWINDOW=18 #how many MONITORCYCLE intervals to wait for catchup b
 readonly MAXUNVALIDATEDDELTA=3 #will count as out of compliance if more than this many blocks ahead or behind unvalidated count
 readonly MAXSTATUSFAILURES=5 #will allow upt to this number of cycles of status failure before force restart
 readonly STANDOFFAFTERRESTART=2 #how many MONITORSYCLCE intervals should be allowed for daemon to try to restart before issuing another restart
-readonly BOOTSTRAPLIMIT=4 #how many intervals should daemon be able to be in bootstrap?
+readonly BOOTSTRAPLIMIT=6 #how many intervals should daemon be able to be in bootstrap?
 readonly GARBAGE="Using password from environment variable CODA_PRIVKEY_PASS" #strip this out of the status
 
 # Monitoring docker containers via graphql instead of daemon locally
