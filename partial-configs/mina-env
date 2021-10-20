@@ -3,7 +3,7 @@ UPTIME_PRIVKEY_PASS="YOU HAVE TO DO THIS YOURSELF"
 SEEDS_URL=THE_SEEDS_URL
 UPTIME_BACKEND_URL=THE_UPTIME_BACKEND_URL
 WALLET_FILE=YOUR_WALLET_FILE
-EXTRA_FLAGS=--bind-ip YOUR_HOST_IP --file-log-level Debug --log-level Warn --coinbase-receiver YOUR_COINBASE_RECEIVER --stop-time 30  --block-producer-key $WALLET_FILE --uptime-submitter-key $WALLET_FILE
+EXTRA_FLAGS=--bind-ip YOUR_HOST_IP --file-log-level Debug --log-level Warn --coinbase-receiver YOUR_COINBASE_RECEIVER --stop-time 30
 #EXTRA_FLAGS_SNARK --work-selection rand --snark-worker-fee YOUR_SW_FEE --run-snark-worker YOUR_SW_ADDRESS
 #EXTRA_FLAGS_SNARK_COORD --run-snark-coordinator YOUR_SW_ADDRESS
 #EXTRA_FLAGS_METRICS --metrics-port 6060 --libp2p-metrics-port 6061
