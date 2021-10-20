@@ -8,6 +8,7 @@ YOUR_SW_ADDRESS=B62qkBqSkXgkirtU3n8HJ9YgwHh3vUD6kGJ5ZRkQYGNPeL5xYL2tL1L
 YOUR_BP_ADDRESS=B62qkBqSkXgkirtU3n8HJ9YgwHh3vUD6kGJ5ZRkQYGNPeL5xYL2tL1L
 YOUR_LEDGER_ARCHIVE_DIRECTORY=/home/minar/ledger-archives
 THE_SEEDS_URL=https://storage.googleapis.com/mina-seed-lists/mainnet_seeds.txt
+THE_UPTIME_BACKEND_URL=http://34.134.227.208/v1/submit
 YOUR_WALLET_FILE=~/keys/my-wallet
 YOUR_COINBASE_RECEIVER=B62qoigHEtJCoZ5ekbGHWyr9hYfc6fkZ2A41h9vvVZuvty9amzEz3yB
 MINA_VERSION=mina-mainnet=1.1.8-b10c0e3
@@ -29,6 +30,7 @@ sed -i "s/YOUR_SW_ADDRESS/$YOUR_SW_ADDRESS/g" scripts/mina-status-monitor.sh
 sed -i "s^YOUR_LEDGER_DIRECTORY^$YOUR_LEDGER_ARCHIVE_DIRECTORY^g" scripts/mina-export-ledgers.sh
 
 sed -i "s^THE_SEEDS_URL^$THE_SEEDS_URL^g" partial-configs/mina-env
+sed -i "s^THE_UPTIME_BACKEND_URL^$THE_UPTIME_BACKEND_URL^g" partial-configs/mina-env
 sed -i "s^YOUR_WALLET_FILE^$YOUR_WALLET_FILE^g" partial-configs/mina-env
 sed -i "s/YOUR_SW_ADDRESS/$YOUR_SW_ADDRESS/g" partial-configs/mina-env
 sed -i "s/YOUR_SW_FEE/$YOUR_SW_FEE/g" partial-configs/mina-env
