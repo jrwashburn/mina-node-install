@@ -2,7 +2,10 @@ CODA_PRIVKEY_PASS="YOU HAVE TO DO THIS YOURSELF"
 UPTIME_PRIVKEY_PASS="YOU HAVE TO DO THIS YOURSELF"
 SEEDS_URL=THE_SEEDS_URL
 WALLET_FILE=YOUR_WALLET_FILE
-EXTRA_FLAGS=--bind-ip YOUR_HOST_IP --work-selection rand --file-log-level Debug --log-level Warn --run-snark-coordinator YOUR_SW_ADDRESS --snark-worker-fee YOUR_SW_FEE --coinbase-receiver YOUR_COINBASE_RECEIVER --archive-address 3086 --log-precomputed-blocks true --metrics-port 6060 --libp2p-metrics-port 6061  --upload-blocks-to-gcloud true  --uptime-submitter YOUR_BP_ADDRESS --uptime-url http://34.134.227.208/v1/submit
+EXTRA_FLAGS=--bind-ip YOUR_HOST_IP --file-log-level Debug --log-level Warn --coinbase-receiver YOUR_COINBASE_RECEIVER --stop-time 30  --block-producer-key $WALLET_FILE --uptime-submitter-key $WALLET_FILE
+#EXTRA_FLAGS_SNARK --work-selection rand --snark-worker-fee YOUR_SW_FEE --run-snark-worker YOUR_SW_ADDRESS
+#EXTRA_FLAGS_SNARK_COORD --run-snark-coordinator YOUR_SW_ADDRESS
+#EXTRA_FLAGS_METRICS --metrics-port 6060 --libp2p-metrics-port 6061
 GCLOUD_KEYFILE=GCS_KEYS
 NETWORK_NAME=YOUR_GCS_NETWORK_NAME
 GCLOUD_BLOCK_UPLOAD_BUCKET=GCS_BUCKET

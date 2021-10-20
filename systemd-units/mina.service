@@ -11,7 +11,11 @@ Restart=always
 RestartSec=15
 ExecStart=/usr/local/bin/mina daemon \
   --generate-genesis-proof true \
-  --block-producer-key $WALLET_FILE \
+  --peer-list-url $SEEDS_URL \
+  --uptime-url http://34.134.227.208/v1/submit
+  --archive-address 3086
+  --log-precomputed-blocks true
+  --upload-blocks-to-gcloud true
   $EXTRA_FLAGS
 ExecStop=/usr/local/bin/mina client stop-daemon
 
