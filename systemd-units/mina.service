@@ -10,8 +10,9 @@ Type=simple
 Restart=always
 RestartSec=15
 ExecStart=/usr/local/bin/mina daemon \
-  --generate-genesis-proof true \
   --peer-list-url $SEEDS_URL \
+  --block-producer-key $WALLET_FILE \
+  --uptime-submitter-key $WALLET_FILE \
   --uptime-url $UPTIME_BACKEND_URL \
   --archive-address 3086 \
   --log-precomputed-blocks true \
