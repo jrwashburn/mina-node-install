@@ -59,7 +59,7 @@ sudo cp partial-configs/mina-sidecar.json /etc/mina-sidecar.json
 sudo apt-get -y install bc
 sudo apt-get -y install jq
 
-echo "deb [trusted=yes] http://packages.o1test.net release main" | sudo tee /etc/apt/sources.list.d/mina.list
+echo "deb [trusted=yes] http://packages.o1test.net stretch stable" | sudo tee /etc/apt/sources.list.d/mina.list
 sudo apt-get -y update
 sudo apt-get install -y curl unzip $MINA_VERSION
 sudo apt-get install -y $ARCHIVE_VERSION
