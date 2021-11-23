@@ -1,6 +1,6 @@
 #!/bin/bash -x
 MINA_VERSION=mina-mainnet=1.2.2-feee67c
-ARCHIVE_VERSION=mina-archive-mainnet=1.2.2-feee67c
+ARCHIVE_VERSION=mina-archive=1.2.2-feee67c
 SIDECAR_VERSION=mina-bp-stats-sidecar=1.2.2-feee67c
 
 systemctl --user stop mina-status-monitor.service
