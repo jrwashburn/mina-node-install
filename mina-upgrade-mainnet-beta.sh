@@ -1,5 +1,5 @@
 #!/bin/bash -x
-MINA_VERSION=mina-mainnet=1.3.0alpha2-2717385
+MINA_VERSION=mina-mainnet=1.3.0alpha1-98ec1bb
 ARCHIVE_VERSION=mina-archive-mainnet=1.2.2-feee67c
 
 systemctl --user stop mina-status-monitor.service
