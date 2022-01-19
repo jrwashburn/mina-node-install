@@ -1,7 +1,7 @@
 #!/bin/bash -x
 INSTALL_UFW=true
-INSTALL_PROMETHEUS=true
-INSTALL_NODEJS=true
+INSTALL_PROMETHEUS=false
+INSTALL_NODEJS=false
 INSTALL_GCLOUD=true
 YOUR_GRAFANA_REMOTE_WRITE_ENDPOINT="https://prometheus-us-central1.grafana.net/api/prom/push"
 YOUR_GRAFANA_METRICS_INSTANCE_ID=**********
@@ -9,9 +9,9 @@ YOUR_GRAFANA_API_KEY=**********
 #provide a unique identifier for each prometheus instance sending data to grafana
 YOUR_MINA_NODE_IDENTIFIER=mina01
 
-sed -i "s^#SystemMaxFileSize=^#SystemMaxFileSize=100M^g" /etc/systemd/journald.conf 
-sed -i "s^#SystemMaxFiles=^#SystemMaxFiles=500^g" /etc/systemd/journald.conf 
-sed -i "s^#MaxFileSec=1month^#MaxFileSec=1week^g" /etc/systemd/journald.conf 
+sed -i "s^#SystemMaxFileSize=^#SystemMaxFileSize=100M^g" /etc/systemd/journald.conf
+sed -i "s^#SystemMaxFiles=^#SystemMaxFiles=500^g" /etc/systemd/journald.conf
+sed -i "s^#MaxFileSec=1month^#MaxFileSec=1week^g" /etc/systemd/journald.conf
 mkdir /var/log/journal
 systemctl force-reload systemd-journald
 

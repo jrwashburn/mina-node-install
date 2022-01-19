@@ -1,5 +1,5 @@
 #!/bin/bash -x
-INSTALL_MINA_POOL_PAYOUT=true
+INSTALL_MINA_POOL_PAYOUT=false
 
 # update your values - these will update the scripts to be installed with these parameters
 YOUR_SW_FEE=0.25
