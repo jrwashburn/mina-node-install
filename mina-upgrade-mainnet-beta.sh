@@ -12,10 +12,6 @@ echo "deb [trusted=yes] http://packages.o1test.net bullseye beta" | sudo tee /et
 sudo apt-get -y update
 
 sudo apt-get install -y $MINA_VERSION
-
-echo "deb [trusted=yes] http://packages.o1test.net stretch stable" | sudo tee /etc/apt/sources.list.d/mina-beta.list
-sudo apt-get -y update
-
 sudo apt-get install -y $ARCHIVE_VERSION
 sudo cp partial-configs/mina-sidecar.json /etc/
 
