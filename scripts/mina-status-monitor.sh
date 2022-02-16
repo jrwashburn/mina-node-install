@@ -9,7 +9,7 @@ readonly MAXUNVALIDATEDDELTA=3 #will count as out of compliance if more than thi
 readonly MAXSTATUSFAILURES=5 #will allow upt to this number of cycles of status failure before force restart
 readonly STANDOFFAFTERRESTART=2 #how many MONITORSYCLCE intervals should be allowed for daemon to try to restart before issuing another restart
 readonly BOOTSTRAPLIMIT=6 #how many intervals should daemon be able to be in bootstrap?
-readonly GARBAGE="Using password from environment variable CODA_PRIVKEY_PASS" #strip this out of the status
+readonly GARBAGE="Using password from environment variable" #strip this out of the status
 
 # Monitoring docker containers via graphql instead of daemon locally
 # Set MONITORVIAGRAPHQL = 0 to use local `mina client` commands. If set to 1, provide GRAPHQL_URI, or it will attempt to detect from docker - assumes instance named mina
