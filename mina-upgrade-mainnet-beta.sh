@@ -1,7 +1,7 @@
 #!/bin/bash -x
-MINA_VERSION=mina-mainnet=1.2.0beta8-5b35b27
-ARCHIVE_VERSION=mina-archive-mainnet=1.2.0beta8-5b35b27
-SIDECAR_VERSION=mina-bp-stats-sidecar=1.2.0beta8-5b35b27
+MINA_VERSION=mina-mainnet=1.3.0beta4-202caa6
+ARCHIVE_VERSION=mina-archive-mainnet=1.3.0beta4-202caa6
+SIDECAR_VERSION=mina-bp-stats-sidecar=1.3.0beta4-202caa6
 
 systemctl --user stop mina-status-monitor.service
 systemctl --user stop mina-staking-ledgers-archive.timer
@@ -9,7 +9,7 @@ systemctl --user stop mina.service
 systemctl --user stop mina-archive.service
 systemctl --user stop mina-sidecar.service
 
-echo "deb [trusted=yes] http://packages.o1test.net stretch beta" | sudo tee /etc/apt/sources.list.d/mina-beta.list
+echo "deb [trusted=yes] http://packages.o1test.net bullseye beta" | sudo tee /etc/apt/sources.list.d/mina-beta.list
 sudo apt-get -y update
 
 sudo apt-get install -y $MINA_VERSION
