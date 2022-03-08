@@ -2,6 +2,7 @@
 MINA_VERSION=mina-mainnet=1.2.2-feee67c
 ARCHIVE_VERSION=mina-archive=1.2.2-feee67c
 SIDECAR_VERSION=mina-bp-stats-sidecar=1.2.2-feee67c
+CODENAME=$(lsb_release -c --short)
 
 systemctl --user stop mina-status-monitor.service
 systemctl --user stop mina-staking-ledgers-archive.timer
@@ -9,7 +10,7 @@ systemctl --user stop mina.service
 systemctl --user stop mina-archive.service
 systemctl --user stop mina-sidecar.service
 
-echo "deb [trusted=yes] http://packages.o1test.net stretch stable" | sudo tee /etc/apt/sources.list.d/mina.list
+echo "deb [trusted=yes] http://packages.o1test.net $CODENAME stable" | sudo tee /etc/apt/sources.list.d/mina.list
 sudo apt-get -y update
 
 sudo apt-get install -y $MINA_VERSION

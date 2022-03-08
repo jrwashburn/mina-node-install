@@ -20,6 +20,7 @@ YOUR_GCS_NETWORK_NAME=mainnet
 GCS_BUCKET=mina-mainnet-blocks
 
 YOUR_HOST_IP="$(curl https://api.ipify.org)"
+CODENAME=$(lsb_release -c --short)
 
 #update status-watchdog with specific fee and snark worker address, place in usr/local/bin
 mkdir -p $YOUR_LEDGER_ARCHIVE_DIRECTORY
@@ -59,11 +60,9 @@ sudo cp partial-configs/mina-sidecar.json /etc/mina-sidecar.json
 sudo apt-get -y install bc
 sudo apt-get -y install jq
 
-echo "deb [trusted=yes] http://packages.o1test.net stretch alpha" | sudo tee /etc/apt/sources.list.d/mina.list
+echo "deb [trusted=yes] http://packages.o1test.net $CODENAME stable" | sudo tee /etc/apt/sources.list.d/mina.list
 sudo apt-get -y update
 sudo apt-get install -y curl unzip $MINA_VERSION
-echo "deb [trusted=yes] http://packages.o1test.net stretch stable" | sudo tee /etc/apt/sources.list.d/mina.list
-sudo apt-get -y update
 sudo apt-get install -y $ARCHIVE_VERSION
 sudo apt-get install -y $SIDECAR_VERSION
 
