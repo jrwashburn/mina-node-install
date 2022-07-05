@@ -76,4 +76,4 @@ echo "RUN: mina daemon --generate-genesis-proof true --peer-list-url https://sto
 
 echo "THEN: upload keys and update pass phrases in ~/.mina-env"
 echo "set uid/pwd/host in ~/.mina-archive-env"
-echo "DO NOT FORGET chmod 700 ~keys & chmod 600 ~/keys/*"
+echo "DO NOT FORGET chmod 700 ~/keys && chmod 600 ~/keys/*"
