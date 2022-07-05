@@ -1,6 +1,6 @@
 #!/bin/bash -x
-MINA_VERSION=mina-mainnet=1.3.1beta1-529bf17
-ARCHIVE_VERSION=mina-archive-mainnet=1.3.1beta1-529bf17
+MINA_VERSION=mina-mainnet=1.3.2beta1-985b1b2
+ARCHIVE_VERSION=mina-archive-mainnet=1.3.2beta1-985b1b2
 CODENAME=$(lsb_release -c --short)
 
 systemctl --user stop mina-status-monitor.service

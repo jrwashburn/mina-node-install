@@ -30,8 +30,7 @@ sudo systemctl restart sshd
 
 sudo apt -y update
 sudo apt -y full-upgrade
-sudo apt-get install -y apt-transport-https ca-certificates gnupg
-sudo apt-get install -y curl
+sudo apt-get install -y apt-transport-https ca-certificates gnupg curl sudo tmux
 
 if $INSTALL_GCLOUD
 then

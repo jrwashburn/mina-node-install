@@ -1,6 +1,6 @@
 #!/bin/bash -x
-MINA_VERSION=mina-devnet=1.3.0-9b0369c
-ARCHIVE_VERSION=mina-archive-devnet=1.3.0-9b0369c
+MINA_VERSION=mina-devnet=1.3.2alpha1-ccaa43c
+ARCHIVE_VERSION=mina-archive-devnet=1.3.2alpha1-ccaa43c
 CODENAME=$(lsb_release -c --short)
 
 THE_SEEDS_URL=https://storage.googleapis.com/seed-lists/devnet_seeds.txt

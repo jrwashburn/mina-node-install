@@ -8,12 +8,12 @@ YOUR_SW_ADDRESS=B62qkBqSkXgkirtU3n8HJ9YgwHh3vUD6kGJ5ZRkQYGNPeL5xYL2tL1L
 YOUR_BP_ADDRESS=B62qkBqSkXgkirtU3n8HJ9YgwHh3vUD6kGJ5ZRkQYGNPeL5xYL2tL1L
 YOUR_LEDGER_ARCHIVE_DIRECTORY=/home/minar/ledger-archives
 THE_SEEDS_URL=https://storage.googleapis.com/mina-seed-lists/mainnet_seeds.txt
-THE_UPTIME_BACKEND_URL=http://34.134.227.208/v1/submit
+THE_UPTIME_BACKEND_URL=https://uptime-backend.minaprotocol.com/v1/submit
 YOUR_WALLET_FILE=~/keys/my-wallet
 YOUR_COINBASE_RECEIVER=B62qoigHEtJCoZ5ekbGHWyr9hYfc6fkZ2A41h9vvVZuvty9amzEz3yB
-MINA_VERSION=mina-mainnet=1.3.0-9b0369c
-ARCHIVE_VERSION=mina-archive=1.3.0-9b0369c
-SIDECAR_VERSION=mina-bp-stats-sidecar=1.3.0-9b0369c
+MINA_VERSION=mina-mainnet=1.3.1-3e3abec
+ARCHIVE_VERSION=mina-archive=1.3.1-3e3abec
+SIDECAR_VERSION=mina-bp-stats-sidecar=1.3.1-3e3abec
 INSTALL_GCLOUD=true
 GCS_KEYS=~/keys/my-gcs.json
 YOUR_GCS_NETWORK_NAME=mainnet
@@ -76,4 +76,4 @@ echo "RUN: mina daemon --generate-genesis-proof true --peer-list-url https://sto
 
 echo "THEN: upload keys and update pass phrases in ~/.mina-env"
 echo "set uid/pwd/host in ~/.mina-archive-env"
-echo "DO NOT FORGET chmod 700 ~keys & chmod 600 ~/keys/*"
+echo "DO NOT FORGET chmod 700 ~/keys && chmod 600 ~/keys/*"
