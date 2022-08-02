@@ -11,9 +11,9 @@ THE_SEEDS_URL=https://storage.googleapis.com/mina-seed-lists/mainnet_seeds.txt
 THE_UPTIME_BACKEND_URL=https://uptime-backend.minaprotocol.com/v1/submit
 YOUR_WALLET_FILE=~/keys/my-wallet
 YOUR_COINBASE_RECEIVER=B62qoigHEtJCoZ5ekbGHWyr9hYfc6fkZ2A41h9vvVZuvty9amzEz3yB
-MINA_VERSION=mina-mainnet=1.3.1-3e3abec
-ARCHIVE_VERSION=mina-archive=1.3.1-3e3abec
-SIDECAR_VERSION=mina-bp-stats-sidecar=1.3.1-3e3abec
+MINA_VERSION=mina-mainnet=1.3.1.1-f361ba1
+ARCHIVE_VERSION=mina-archive=1.3.1.1-f361ba1
+SIDECAR_VERSION=mina-bp-stats-sidecar=1.3.1.1-f361ba1
 INSTALL_GCLOUD=true
 GCS_KEYS=~/keys/my-gcs.json
 YOUR_GCS_NETWORK_NAME=mainnet
