@@ -17,7 +17,7 @@ sudo apt-get install -y $ARCHIVE_VERSION
 systemctl --user daemon-reload
 #systemctl --user start mina-archive.service
 systemctl --user start mina.service
-echo "going to sleeep for 1 minute to let daemon startup"
+echo "going to sleep for 1 minute to let daemon startup"
 sleep 1m
 systemctl --user start mina-staking-ledgers-archive.timer
 systemctl --user start mina-sidecar.service
