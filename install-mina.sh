@@ -11,9 +11,8 @@ THE_SEEDS_URL=https://storage.googleapis.com/mina-seed-lists/mainnet_seeds.txt
 THE_UPTIME_BACKEND_URL=https://uptime-backend.minaprotocol.com/v1/submit
 YOUR_WALLET_FILE=~/keys/my-wallet
 YOUR_COINBASE_RECEIVER=B62qoigHEtJCoZ5ekbGHWyr9hYfc6fkZ2A41h9vvVZuvty9amzEz3yB
-MINA_VERSION=mina-mainnet=1.3.1.1-f361ba1
-ARCHIVE_VERSION=mina-archive=1.3.1.1-f361ba1
-SIDECAR_VERSION=mina-bp-stats-sidecar=1.3.1.1-f361ba1
+MINA_VERSION=mina-mainnet=1.4.0-c980ba8
+ARCHIVE_VERSION=mina-archive=1.4.0-c980ba8
 INSTALL_GCLOUD=true
 GCS_KEYS=~/keys/my-gcs.json
 YOUR_GCS_NETWORK_NAME=mainnet
@@ -45,17 +44,14 @@ then
     sed -i "s^GCS_BUCKET^$GCS_BUCKET^g" partial-configs/mina-env
 fi
 
-sudo cp scripts/mina-status-monitor.sh /usr/local/bin/mina-status-monitor.sh
 sudo cp scripts/mina-export-ledgers.sh /usr/local/bin/mina-export-ledgers.sh
 sudo cp scripts/mina-log-archive-gcs-upload.sh /usr/local/bin/mina-log-archive-gcs-upload.sh
-sudo chmod +x /usr/local/bin/mina-status-monitor.sh
 sudo chmod +x /usr/local/bin/mina-export-ledgers.sh
 sudo chmod +x /usr/local/bin/mina-log-archive-gcs-upload.sh
 sudo cp systemd-units/mina* /etc/systemd/user/
 
 cp partial-configs/mina-env ~/.mina-env
 cp partial-configs/mina-archive-env ~/.mina-archive-env
-sudo cp partial-configs/mina-sidecar.json /etc/mina-sidecar.json
 
 sudo apt-get -y install bc
 sudo apt-get -y install jq
@@ -64,7 +60,6 @@ echo "deb [trusted=yes] http://packages.o1test.net $CODENAME stable" | sudo tee 
 sudo apt-get -y update
 sudo apt-get install -y curl unzip $MINA_VERSION
 sudo apt-get install -y $ARCHIVE_VERSION
-sudo apt-get install -y $SIDECAR_VERSION
 
 if $INSTALL_MINA_POOL_PAYOUT
 then
