@@ -11,8 +11,12 @@ POSTGRES_DBNAME=${2}
 POSTGRES_USERNAME=${3}
 POSTGRES_PASSWORD=${4}
 PG_CONN=postgres://${POSTGRES_USERNAME}:${POSTGRES_PASSWORD}@jkwh1-mina-archive-do-user-8013304-0.c.db.ondigitalocean.com:25060/${POSTGRES_DBNAME}?sslmode=require
+
 function jq_parent_json() {
   jq -rs 'map(select(.metadata.parent_hash != null and .metadata.parent_height != null)) | "\(.[0].metadata.parent_height)-\(.[0].metadata.parent_hash).json"'
+}
+function jq_skip_parent_json() {
+  jq -rs 'map(select(.metadata.parent_hash != null and .metadata.parent_height != null)) | "\(.[1].metadata.parent_height)-\(.[1].metadata.parent_hash).json"'
 }
 
 function jq_parent_hash() {
@@ -37,10 +41,6 @@ function download_block() {
     CHECKBLOCK=$(grep '<Error><Code>NoSuchKey</Code>' $1 | wc -l)
     if [[ $CHECKBLOCK -eq 1 ]]; then
       echo "Block $1 not found in either bucket"
-      if [[ $1 == "mainnet-1-3NKeMoncuHab5ScarV5ViyF16cJPT4taWNSaTLS64Dp67wuXigPZ.json" ]]; then
-        echo "Block $1 not found in either bucket, but it's ok, we know it's genesis."
-        return
-      fi
       exit 1
     else    
       echo "Block $1 found in O1 Labs bucket - copying to Google Cloud Storage for retry"
@@ -55,15 +55,17 @@ function download_block() {
 HASH='map(select(.metadata.parent_hash != null and .metadata.parent_height != null)) | .[0].metadata.parent_hash'
 # Bootstrap finds every missing state hash in the database and imports them from the o1labs bucket of .json blocks
 function bootstrap() {
-  echo "[BOOTSTRAP] Top 10 blocks before bootstrapping the archiveDB:"
-  psql "${PG_CONN}" -c "SELECT state_hash,height FROM blocks ORDER BY height DESC LIMIT 10"
   echo "[BOOTSTRAP] Restoring blocks individually from ${BLOCKS_BUCKET}..."
 
   until [[ "$PARENT" == "null" ]] ; do
     PARENT_FILE="${MINA_NETWORK}-$(mina-missing-blocks-auditor --archive-uri $PG_CONN | jq_parent_json)"
+    if [[ "$PARENT_FILE" == "${MINA_NETWORK}-1-3NKeMoncuHab5ScarV5ViyF16cJPT4taWNSaTLS64Dp67wuXigPZ.json" ]]; then
+      echo "[BOOTSTRAP] Missing genesis block - continuing"
+      PARENT_FILE="${MINA_NETWORK}-$(mina-missing-blocks-auditor --archive-uri $PG_CONN | jq_skip_parent_json)"
+    fi
     download_block "${PARENT_FILE}"
     populate_db "$PG_CONN" "$PARENT_FILE"
-    PARENT="$(mina-missing-blocks-auditor --archive-uri $PG_CONN | jq_parent_hash)"
+    PARENT="$(mina-missing-blocks-auditor --archive-uri $PG_CONN | jq_skip_parent_json)"
   done
 
   echo "[BOOTSTRAP] Top 10 blocks in bootstrapped archiveDB:"
