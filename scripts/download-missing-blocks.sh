@@ -37,7 +37,7 @@ function download_block() {
     CHECKBLOCK=$(grep '<Error><Code>NoSuchKey</Code>' $1 | wc -l)
     if [[ $CHECKBLOCK -eq 1 ]]; then
       echo "Block $1 not found in either bucket"
-      if [[ $1 -eq "mainnet-1-3NKeMoncuHab5ScarV5ViyF16cJPT4taWNSaTLS64Dp67wuXigPZ.json" ]]; then
+      if [[ $1 == "mainnet-1-3NKeMoncuHab5ScarV5ViyF16cJPT4taWNSaTLS64Dp67wuXigPZ.json" ]]; then
         echo "Block $1 not found in either bucket, but it's ok, we know it's genesis."
         return
       fi
