@@ -7,10 +7,7 @@ set -u
 
 MINA_NETWORK=${1}
 # Postgres database connection string and related variables
-POSTGRES_DBNAME=${2}
-POSTGRES_USERNAME=${3}
-POSTGRES_PASSWORD=${4}
-PG_CONN=postgres://${POSTGRES_USERNAME}:${POSTGRES_PASSWORD}@jkwh1-mina-archive-do-user-8013304-0.c.db.ondigitalocean.com:25060/${POSTGRES_DBNAME}?sslmode=require
+PG_CONN=${2}
 
 function jq_parent_json() {
   jq -rs 'map(select(.metadata.parent_hash != null and .metadata.parent_height != null)) | "\(.[0].metadata.parent_height)-\(.[0].metadata.parent_hash).json"'
@@ -24,6 +21,7 @@ function jq_parent_hash() {
 }
 
 function populate_db() {
+  echo "Attempting to populate archive db with $2"
   mina-archive-blocks --precomputed --archive-uri "$1" "$2" | jq -rs '"[BOOTSTRAP] Populated database with block: \(.[-1].message)"'
   rm "$2"
 }
@@ -59,19 +57,10 @@ function bootstrap() {
 
   until [[ "$PARENT" == "null" ]] ; do
     PARENT_FILE="${MINA_NETWORK}-$(mina-missing-blocks-auditor --archive-uri $PG_CONN | jq_parent_json)"
-    if [[ "$PARENT_FILE" == "${MINA_NETWORK}-1-3NKeMoncuHab5ScarV5ViyF16cJPT4taWNSaTLS64Dp67wuXigPZ.json" ]]; then
-      echo "[BOOTSTRAP] Missing genesis block - continuing"
-      PARENT_FILE="${MINA_NETWORK}-$(mina-missing-blocks-auditor --archive-uri $PG_CONN | jq_skip_parent_json)"
-      echo "[BOOTSTRAP] next block is " $PARENT_FILE
-      if [[ "$PARENT_FILE" == "mainnet-null-null.json" ]]; then
-        echo "[BOOTSTRAP] No more blocks to bootstrap"
-        PARENT=null
-      else
-        download_block "${PARENT_FILE}"
-        populate_db "$PG_CONN" "$PARENT_FILE"
-        PARENT="$(mina-missing-blocks-auditor --archive-uri $PG_CONN | jq_parent_json)"
-      fi
-    fi
+    echo "[BOOTSTRAP] next block is " $PARENT_FILE
+    download_block "${PARENT_FILE}"
+    populate_db "$PG_CONN" "$PARENT_FILE"
+    PARENT="$(mina-missing-blocks-auditor --archive-uri $PG_CONN | jq_parent_json)"
   done
 
   echo "[BOOTSTRAP] Top 10 blocks in bootstrapped archiveDB:"
