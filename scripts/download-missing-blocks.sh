@@ -33,8 +33,7 @@ function download_block() {
   CHECKBLOCK=$(grep '<Error><Code>NoSuchKey</Code>' $1 | wc -l)
   if [[ $CHECKBLOCK -eq 1 ]]; then
     CHECKBLOCK=0
-    echo "Block $1 not found in bucket"
-    echo "Downloading $1 block from O1 Labs"
+    echo "Block $1 not found in bucket, will check O1 Labs bucket"
     curl -sO "https://storage.googleapis.com/"${O1BLOCKS_BUCKET}/${1}
     CHECKBLOCK=$(grep '<Error><Code>NoSuchKey</Code>' $1 | wc -l)
     if [[ $CHECKBLOCK -eq 1 ]]; then
@@ -46,7 +45,7 @@ function download_block() {
       rm $1
     fi
   else
-    echo "Block $1 found in bucket"
+    echo "Block $1 found in bucket, downloaded."
   fi
 }
 
@@ -57,34 +56,25 @@ function bootstrap() {
 
   until [[ "$PARENT" == "null" ]] ; do
     PARENT_FILE="${MINA_NETWORK}-$(mina-missing-blocks-auditor --archive-uri $PG_CONN | jq_parent_json)"
-    echo "[BOOTSTRAP] next block is " $PARENT_FILE
+    echo "[BOOTSTRAP] next block is $PARENT_FILE date()"
     download_block "${PARENT_FILE}"
     populate_db "$PG_CONN" "$PARENT_FILE"
+    echo "[BOOTSTRAP] loaded $PARENT_FILE date()"
     PARENT="$(mina-missing-blocks-auditor --archive-uri $PG_CONN | jq_parent_json)"
   done
 
   echo "[BOOTSTRAP] Top 10 blocks in bootstrapped archiveDB:"
   psql "${PG_CONN}" -c "SELECT state_hash,height FROM blocks ORDER BY height DESC LIMIT 10"
   echo "[BOOTSTRAP] This rosetta node is synced with no missing blocks back to genesis!"
-
-  echo "[BOOTSTRAP] Checking again in 5 minutes..."
-  date
-  sleep 300
-  date
 }
 
 # Wait until there is a block missing
 PARENT=null
-while true; do # Test once every 10 minutes forever, take an hour off when bootstrap completes
-#  output=$(mina-missing-blocks-auditor --archive-uri $PG_CONN)
-#  if [ $? -ne 0 ]; then
-#    echo "Error running mina-missing-blocks-auditor"
-#    echo $output
-#    exit 1 
-#  fi
-#  PARENT=$(echo "$output" | jq_parent_hash)
+while true; do # Test once every 5 minutes forever
   PARENT="$(mina-missing-blocks-auditor --archive-uri $PG_CONN | jq_parent_hash)"
-  echo ran mina-missing-blocks-auditor $PARENT
-  [[ "$PARENT" != "null" ]] && echo "[BOOSTRAP] Some blocks are missing, moving to recovery logic..." && bootstrap
+  [[ "$PARENT" == "null" ]] && echo ran mina-missing-blocks-auditor and found no missing blocks.
+  [[ "$PARENT" != "null" ]] && echo "[BOOSTRAP] Some blocks are missing, moving to recovery logic... starting with $PARENT" && bootstrap
+  echo "Sleeping for 5 minutes - will check again."
+  sleep 300
 done
 echo "[BOOTSTRAP] This rosetta node is synced with no missing blocks back to genesis!"
