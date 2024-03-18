@@ -1,0 +1,12 @@
+[Unit]
+Description=Mina Missing Blocks Service 
+After=mina-archive.service
+StartLimitIntervalSec=60
+StartLimitBurst=5
+
+[Service]
+Type=simple
+ExecStart=/bin/bash /usr/local/bin/download-missing-blocks.sh
+
+[Install]
+WantedBy=default.target

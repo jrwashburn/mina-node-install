@@ -41,7 +41,7 @@ function download_block() {
       exit 1
     else    
       echo "Block $1 found in O1 Labs bucket - copying to Google Cloud Storage for retry"
-      gcloud storage cp $1 gs://storage.googleapis.com/${JKWH1_BLOCKS_BUCKET}/
+      gcloud storage cp $1 gs://${JKWH1_BLOCKS_BUCKET}/
       rm $1
     fi
   else
@@ -56,10 +56,10 @@ function bootstrap() {
 
   until [[ "$PARENT" == "null" ]] ; do
     PARENT_FILE="${MINA_NETWORK}-$(mina-missing-blocks-auditor --archive-uri $PG_CONN | jq_parent_json)"
-    echo "[BOOTSTRAP] next block is $PARENT_FILE date()"
+    echo "[BOOTSTRAP] next block is $PARENT_FILE"; date
     download_block "${PARENT_FILE}"
     populate_db "$PG_CONN" "$PARENT_FILE"
-    echo "[BOOTSTRAP] loaded $PARENT_FILE date()"
+    echo "[BOOTSTRAP] loaded $PARENT_FILE"; date
     PARENT="$(mina-missing-blocks-auditor --archive-uri $PG_CONN | jq_parent_json)"
   done
 

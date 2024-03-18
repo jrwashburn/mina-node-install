@@ -15,6 +15,11 @@ for FILE in "$DIR"/*.json; do
     BASE=$(basename $FILE)
     HASH=$(basename $FILE .json)
 
+    if [ "$BASE" = "staking-epoch-ledger.json" ] || [ "$BASE" = "next-epoch-ledger.json" ]; then
+        echo skipping download files not hashed
+        continue
+    fi
+
     echo "Uploading $FILE for hash $BASE:"
 
     # Upload the file and capture the HTTP status code
