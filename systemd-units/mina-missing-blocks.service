@@ -6,7 +6,11 @@ StartLimitBurst=5
 
 [Service]
 Type=simple
-ExecStart=/bin/bash /usr/local/bin/download-missing-blocks.sh
-
+Restart=always
+RestartSec=15
+EnvironmentFile=%h/.mina-missing-blocks-env
+ExecStart=/bin/bash /usr/local/bin/download-missing-blocks.sh \
+ $POSTGRES_URI $NETWORK_NAME $GCLOUD_BLOCK_UPLOAD_BUCKET
+WorkingDirectory=%h/missing-blocks
 [Install]
 WantedBy=default.target
