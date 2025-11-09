@@ -1,0 +1,12 @@
+[Unit]
+Description=Mina Discord Bot Service
+After=network-online.target
+
+[Service]
+Type=simple
+Restart=always
+RestartSec=15min
+ExecStart=/usr/local/bin/discord_bot.sh 
+
+[Install]
+WantedBy=default.target
