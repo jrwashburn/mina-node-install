@@ -11,7 +11,6 @@ GARBAGE="Using password from environment variable CODA_PRIVKEY_PASS"
 for LEDGER in staking-epoch-ledger next-epoch-ledger; do
     NEW_FILE=$(/usr/local/bin/mina ledger hash --ledger-file "$YOUR_LEDGER_DIRECTORY/$LEDGER.json" | xargs -I % echo "$YOUR_LEDGER_DIRECTORY/%.json")
     echo will create $NEW_FILE
-    #mv "$YOUR_LEDGER_DIRECTORY/$LEDGER.json" "$NEW_FILE"
     cp "$YOUR_LEDGER_DIRECTORY/$LEDGER.json" "$NEW_FILE"
     HASH=$(basename "$NEW_FILE" .json)
 
