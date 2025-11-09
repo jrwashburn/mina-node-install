@@ -1,6 +1,4 @@
 #!/bin/bash -x
-INSTALL_MINA_POOL_PAYOUT=false
-
 # update your values - these will update the scripts to be installed with these parameters
 YOUR_SW_FEE=0.25
 YOUR_SW_ADDRESS=B62qkBqSkXgkirtU3n8HJ9YgwHh3vUD6kGJ5ZRkQYGNPeL5xYL2tL1L
@@ -46,9 +44,11 @@ fi
 sudo cp scripts/mina-export-ledgers.sh /usr/local/bin/mina-export-ledgers.sh
 sudo cp scripts/mina-log-archive-gcs-upload.sh /usr/local/bin/mina-log-archive-gcs-upload.sh
 sudo cp scripts/download-missing-blocks.sh /usr/local/bin/download-missing-blocks.sh
+sudo cp scripts/discord_bot.sh /usr/local/bin/discord_bot.sh
 sudo chmod +x /usr/local/bin/mina-export-ledgers.sh
 sudo chmod +x /usr/local/bin/mina-log-archive-gcs-upload.sh
 sudo chmod +x /usr/local/bin/download-missing-blocks.sh
+sudo chmod +x /usr/local/bin/discord_bot.sh
 sudo cp systemd-units/mina* /etc/systemd/user/
 
 cp partial-configs/mina-env ~/.mina-env
@@ -57,15 +57,11 @@ cp partial-configs/mina-archive-env ~/.mina-archive-env
 sudo apt-get -y install bc
 sudo apt-get -y install jq
 
+sudo rm /etc/apt/sources.list.d/mina*.list
 echo "deb [trusted=yes] http://packages.o1test.net $CODENAME stable" | sudo tee /etc/apt/sources.list.d/mina.list
 sudo apt-get -y update
 sudo apt-get install -y curl unzip $MINA_VERSION
 sudo apt-get install -y $ARCHIVE_VERSION
-
-if $INSTALL_MINA_POOL_PAYOUT
-then
-    git clone https://github.com/jrwashburn/mina-pool-payout.git
-fi
 
 echo "start daemon interactive - control + c once running to stop"
 echo "RUN: mina daemon --generate-genesis-proof true --peer-list-url $THE_SEEDS_URL"
