@@ -9,8 +9,8 @@ THE_SEEDS_URL=https://bootnodes.minaprotocol.com/networks/mainnet.txt
 THE_UPTIME_BACKEND_URL=https://uptime-backend.minaprotocol.com/v1/submit
 YOUR_WALLET_FILE=~/keys/my-wallet
 YOUR_COINBASE_RECEIVER=B62qoigHEtJCoZ5ekbGHWyr9hYfc6fkZ2A41h9vvVZuvty9amzEz3yB
-MINA_VERSION=mina-mainnet=3.2.0-97ad487
-ARCHIVE_VERSION=mina-archive=3.2.0-97ad487
+MINA_VERSION=mina-mainnet=4.0.4-c9e2eac
+ARCHIVE_VERSION=mina-archive-mainnet=4.0.4-c9e2eac
 INSTALL_GCLOUD=true
 GCS_KEYS=~/keys/my-gcs.json
 YOUR_GCS_NETWORK_NAME=mainnet

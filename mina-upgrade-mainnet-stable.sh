@@ -1,6 +1,6 @@
 #!/bin/bash -x
-MINA_VERSION=mina-mainnet=3.3.0-8c0c2e6
-ARCHIVE_VERSION=mina-archive=3.3.0-8c0c2e6
+MINA_VERSION=mina-mainnet=4.0.4-c9e2eac
+ARCHIVE_VERSION=mina-archive-mainnet=4.0.4-c9e2eac
 CODENAME=$(lsb_release -c --short)
 
 sudo rm /etc/apt/sources.list.d/mina*.list

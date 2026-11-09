@@ -4,9 +4,8 @@ USERNAME=""
 PASSWORD=""
 # Directory containing the JSON files
 YOUR_LEDGER_DIRECTORY="/home/minar/ledger-archives"
-GARBAGE="Using password from environment variable CODA_PRIVKEY_PASS"
-/usr/local/bin/mina ledger export staking-epoch-ledger | grep -v --regexp="$GARBAGE" > "$YOUR_LEDGER_DIRECTORY/staking-epoch-ledger.json"
-/usr/local/bin/mina ledger export next-epoch-ledger | grep -v --regexp="$GARBAGE" > "$YOUR_LEDGER_DIRECTORY/next-epoch-ledger.json"
+/usr/local/bin/mina ledger export staking-epoch-ledger > "$YOUR_LEDGER_DIRECTORY/staking-epoch-ledger.json"
+/usr/local/bin/mina ledger export next-epoch-ledger > "$YOUR_LEDGER_DIRECTORY/next-epoch-ledger.json"
 
 for LEDGER in staking-epoch-ledger next-epoch-ledger; do
     NEW_FILE=$(/usr/local/bin/mina ledger hash --ledger-file "$YOUR_LEDGER_DIRECTORY/$LEDGER.json" | xargs -I % echo "$YOUR_LEDGER_DIRECTORY/%.json")
